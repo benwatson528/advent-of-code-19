@@ -4,15 +4,15 @@ import org.scalatest.FunSuite
 
 import scala.io.Source
 
-class MainClassTest extends FunSuite {
+class ${internal_class_name}Test extends FunSuite {
     test("sumNumbers +1, +1, +1") {
         val input = List(1, 1, 1)
-        assert(3 === MainClass.sumNumbers(input))
+        assert(3 === ${internal_class_name}.sumNumbers(input))
     }
 
     test("sumNumbers real") {
         val input = Source.fromResource("${internal_day}/input.txt").getLines.toList
             .map(_.toString.toInt)
-        assert(435 === MainClass.sumNumbers(input))
+        assert(435 === ${internal_class_name}.sumNumbers(input))
     }
 }

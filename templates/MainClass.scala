@@ -1,6 +1,6 @@
 package uk.co.hadoopathome.adventofcode19.${internal_day}
 
-object MainClass {
+object ${internal_class_name} {
     def sumNumbers(ls: List[Int]): Int = {
         sumNumbersRec(ls, 0)
     }
