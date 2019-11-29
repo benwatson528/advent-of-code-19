@@ -1,10 +1,14 @@
 #!/bin/bash
 
+cd $(dirname $0)
+
 PACKAGE="uk/co/hadoopathome/adventofcode19"
-TEMPLATE_DIR="templates"
+TEMPLATE_DIR="../templates"
+PROJECT_ROOT="../../../.."
 
 if [ $# -ne 2 ]; then
-    echo "Day and class name must be given as arguments"
+    echo "Day and puzzle name must be given as arguments."
+    echo "USAGE EXAMPLE: ./create-day.sh 1 MinecraftMadness"
     exit 1
 fi
 
@@ -17,9 +21,9 @@ class_name=${2}
 
 echo "Creating files for ${day}"
 
-destination_main="src/main/scala/${PACKAGE}/${day}"
-destination_test="src/test/scala/${PACKAGE}/${day}"
-destination_resources="src/test/resources/${day}"
+destination_main="${PROJECT_ROOT}/src/main/scala/${PACKAGE}/${day}"
+destination_test="${PROJECT_ROOT}/src/test/scala/${PACKAGE}/${day}"
+destination_resources="${PROJECT_ROOT}/src/test/resources/${day}"
 main_class_name="${class_name}.scala"
 test_class_name="${class_name}Test.scala"
 
