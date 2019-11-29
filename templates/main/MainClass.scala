@@ -1,4 +1,4 @@
-package uk.co.hadoopathome.adventofcode19.day1
+package uk.co.hadoopathome.adventofcode19.${internal_day}
 
 object MainClass {
     def sumNumbers(ls: List[Int]): Int = {

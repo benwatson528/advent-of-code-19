@@ -1,4 +1,4 @@
-package uk.co.hadoopathome.adventofcode19.day1
+package uk.co.hadoopathome.adventofcode19.${internal_day}
 
 import org.scalatest.FunSuite
 
@@ -10,18 +10,8 @@ class MainClassTest extends FunSuite {
         assert(3 === MainClass.sumNumbers(input))
     }
 
-    test("sumNumbers +1, +1, -2") {
-        val input = List(1, 1, -2)
-        assert(0 === MainClass.sumNumbers(input))
-    }
-
-    test("sumNumbers -1, -2, -3") {
-        val input = List(-1, -2, -3)
-        assert(-6 === MainClass.sumNumbers(input))
-    }
-
     test("sumNumbers real") {
-        val input = Source.fromResource("day1/input.txt").getLines.toList
+        val input = Source.fromResource("${internal_day}/input.txt").getLines.toList
             .map(_.toString.toInt)
         assert(435 === MainClass.sumNumbers(input))
     }
