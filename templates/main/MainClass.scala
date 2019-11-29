@@ -1,6 +1,6 @@
 package uk.co.hadoopathome.adventofcode19.day1
 
-object ChronalCalibration {
+object MainClass {
     def sumNumbers(ls: List[Int]): Int = {
         sumNumbersRec(ls, 0)
     }
