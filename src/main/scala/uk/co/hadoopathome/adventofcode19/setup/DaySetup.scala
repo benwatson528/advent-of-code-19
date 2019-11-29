@@ -1,7 +1,5 @@
 package uk.co.hadoopathome.adventofcode19.setup
 
-import java.io.PrintWriter
-
 import scala.io.Source
 import scala.sys.process.Process
 import scala.util.Using
