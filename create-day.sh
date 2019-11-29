@@ -14,6 +14,7 @@ day="day${formatted_day}"
 
 class_name=${2}
 
+
 echo "Creating files for ${day}"
 
 destination_main="src/main/scala/${PACKAGE}/${day}"
