@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# TO RUN:
+# ```
+#create-day.sh <DAY> <CLASS_NAME>
+# ```
+#
+# Where:
+#  * **`<DAY>`** is the day to be created (for example `1` or `23`)
+#  * **`<CLASS_NAME>`** is the name of the class (and corresponding test class) to be created (for example
+#  `MinecartMadness`).
+
 cd $(dirname $0)
 
 PACKAGE="uk/co/hadoopathome/adventofcode19"

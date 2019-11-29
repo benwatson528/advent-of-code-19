@@ -8,7 +8,7 @@ object DaySetup {
 
   def main(args: Array[String]): Unit = {
     val day = "1"
-    val puzzleUrl = "https://adventofcode.com/2018/day/" + day
+    val puzzleUrl = "https://adventofcode.com/2019/day/" + day
     val puzzleName = getPuzzleName(puzzleUrl)
 
     val scriptPath = "src/main/resources/script/create-day.sh"
