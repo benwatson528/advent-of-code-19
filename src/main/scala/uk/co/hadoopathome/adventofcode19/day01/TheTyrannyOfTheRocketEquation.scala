@@ -8,7 +8,8 @@ object TheTyrannyOfTheRocketEquation {
   private def calculateFuelRequired(mass: Int, includeFuelWeight: Boolean): Int = {
     if (!includeFuelWeight)
       calculateFuelForMass(mass)
-    else calculateFuelRequiredRec(0, mass)
+    else
+      calculateFuelRequiredRec(0, mass)
   }
 
   @scala.annotation.tailrec
