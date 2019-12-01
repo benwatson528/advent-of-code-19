@@ -17,9 +17,9 @@ TEMPLATE_DIR="../templates"
 PROJECT_ROOT="../../../.."
 
 if [ $# -ne 2 ]; then
-    echo "Day and puzzle name must be given as arguments."
-    echo "USAGE EXAMPLE: ./create-day.sh 1 MinecraftMadness"
-    exit 1
+  echo "Day and puzzle name must be given as arguments."
+  echo "USAGE EXAMPLE: ./create-day.sh 1 MinecraftMadness"
+  exit 1
 fi
 
 unformatted_day=${1}
