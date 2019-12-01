@@ -6,10 +6,10 @@ object TheTyrannyOfTheRocketEquation {
   }
 
   private def calculateFuelRequired(mass: Int, includeFuelWeight: Boolean): Int = {
-    if (!includeFuelWeight)
-      calculateFuelForMass(mass)
-    else
+    if (includeFuelWeight)
       calculateFuelRequiredRec(0, mass)
+    else
+      calculateFuelForMass(mass)
   }
 
   @scala.annotation.tailrec
