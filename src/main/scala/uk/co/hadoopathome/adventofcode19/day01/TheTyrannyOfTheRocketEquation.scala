@@ -2,15 +2,7 @@ package uk.co.hadoopathome.adventofcode19.day01
 
 object TheTyrannyOfTheRocketEquation {
   def sumFuelRequirements(ls: List[Int], includeFuelWeight: Boolean): Int = {
-    sumFuelRequirementsRec(ls, 0, includeFuelWeight)
-  }
-
-  @scala.annotation.tailrec
-  private def sumFuelRequirementsRec(ls: List[Int], sum: Int, includeFuelWeight: Boolean): Int = {
-    ls match {
-      case x :: xx => sumFuelRequirementsRec(xx, sum + calculateFuelRequired(x, includeFuelWeight), includeFuelWeight)
-      case _ => sum
-    }
+    ls.foldLeft(0)((a, b) => a + calculateFuelRequired(b, includeFuelWeight))
   }
 
   private def calculateFuelRequired(mass: Int, includeFuelWeight: Boolean): Int = {
