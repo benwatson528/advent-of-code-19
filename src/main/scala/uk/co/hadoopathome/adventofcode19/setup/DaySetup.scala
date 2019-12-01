@@ -18,6 +18,6 @@ object DaySetup extends App {
   private def getPuzzleName(puzzleUrl: String): String = {
     val entirePage = Using(Source.fromURL(puzzleUrl)) { source => source.mkString }.get
     val puzzleName = entirePage.split("--- ")(1).split(" ---")(0).split(": ")(1)
-    puzzleName.replaceAll("\\s", "")
+    puzzleName.split(" ").map(_.capitalize).mkString
   }
 }
