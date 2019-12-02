@@ -5,7 +5,7 @@ import scala.sys.process.Process
 import scala.util.Using
 
 object DaySetup extends App {
-  val day = "1"
+  val day = 2.toString
   val puzzleUrl = "https://adventofcode.com/2019/day/" + day
   val puzzleName = getPuzzleName(puzzleUrl)
 
@@ -18,6 +18,11 @@ object DaySetup extends App {
   private def getPuzzleName(puzzleUrl: String): String = {
     val entirePage = Using(Source.fromURL(puzzleUrl)) { source => source.mkString }.get
     val puzzleName = entirePage.split("--- ")(1).split(" ---")(0).split(": ")(1)
-    puzzleName.split(" ").map(_.capitalize).mkString
+    val trimmedPuzzleName = puzzleName.split(" ").map(_.capitalize).mkString
+    if (trimmedPuzzleName.head.isDigit) {
+      "A" + trimmedPuzzleName
+    } else {
+      trimmedPuzzleName
+    }
   }
 }
