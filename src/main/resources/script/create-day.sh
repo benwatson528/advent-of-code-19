@@ -39,15 +39,18 @@ test_class_name="${class_name}Test.scala"
 
 mkdir ${destination_main}
 cp ${TEMPLATE_DIR}/MainClass.scala ${destination_main}/${main_class_name}
+echo "Creating dev class ${destination_main}/${main_class_name}"
 
 mkdir ${destination_test}
 cp ${TEMPLATE_DIR}/MainClassTest.scala ${destination_test}/${test_class_name}
+echo "Creating test class ${destination_test}/${test_class_name}"
 
 mkdir ${destination_resources}
-cp ${TEMPLATE_DIR}/input.txt ${destination_resources}
+touch ${destination_resources}/input.txt
+echo "Creating input file ${destination_resources}/input.txt"
 
 
-echo "Updating references inside files"
+echo "Updating references inside classes"
 
 sed -i -e "s/\${internal_day}/${day}/" -e "s/\${internal_class_name}/${class_name}/" ${destination_main}/${main_class_name}
 sed -i -e "s/\${internal_day}/${day}/" -e "s/\${internal_class_name}/${class_name}/" ${destination_test}/${test_class_name}
