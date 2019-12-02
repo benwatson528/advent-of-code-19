@@ -2,9 +2,7 @@ package uk.co.hadoopathome.adventofcode19.day02
 
 
 object A1202ProgramAlarm {
-  def runProgram(ls: IndexedSeq[Int]): IndexedSeq[Int] = {
-    iterateProgramRec(0, ls)
-  }
+  def runProgram(ls: IndexedSeq[Int]): IndexedSeq[Int] = iterateProgramRec(0, ls)
 
   @scala.annotation.tailrec
   private def iterateProgramRec(i: Int, ls: IndexedSeq[Int]): IndexedSeq[Int] = {

@@ -3,6 +3,7 @@ package uk.co.hadoopathome.adventofcode19.day02
 import org.scalatest.FunSuite
 
 import scala.io.Source
+import scala.util.control.Breaks._
 
 class A1202ProgramAlarmTest extends FunSuite {
   test("runProgram opcode 1") {
@@ -28,7 +29,26 @@ class A1202ProgramAlarmTest extends FunSuite {
   test("runProgram real part 1") {
     val input = Source.fromResource("day02/input.txt").getLines().next().split(",").toList
       .map(_.toInt).toIndexedSeq
-    val modifiedInput = input.updated(1, 12).updated(2, 2)
-    assert(6327510 === A1202ProgramAlarm.runProgram(modifiedInput).head)
+    assert(6327510 === A1202ProgramAlarm.runProgram(updateInput(12, 2, input)).head)
   }
+
+  test("runProgram real part 2") {
+    val input = Source.fromResource("day02/input.txt").getLines().next().split(",").toList
+      .map(_.toInt).toIndexedSeq
+    var foundAnswer = false
+    breakable {
+      for (x <- 0 to 99;
+           y <- 0 to 99) {
+        val finalList = A1202ProgramAlarm.runProgram(updateInput(x, y, input))
+        if (19690720 == finalList.head) {
+          assert(4112 === 100 * finalList(1) + finalList(2))
+          foundAnswer = true
+          break
+        }
+      }
+    }
+    assert(true === foundAnswer)
+  }
+
+  private def updateInput(a: Int, b: Int, ls: IndexedSeq[Int]): IndexedSeq[Int] = ls.updated(1, a).updated(2, b)
 }
