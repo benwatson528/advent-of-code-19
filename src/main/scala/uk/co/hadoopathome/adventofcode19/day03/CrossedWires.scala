@@ -12,18 +12,7 @@ object CrossedWires {
   }
 
   def travel(wire: List[String]): IndexedSeq[Coord] =
-    travelRec(wire.map(convertToCommand), IndexedSeq[Coord](START_POSITION))
-
-  def convertToCommand(rawCommand: String): Command = {
-    val (rawDirection, rawMagnitude) = (rawCommand.head, rawCommand.tail)
-    val direction = rawDirection match {
-      case x if x == 'U' => UP
-      case x if x == 'D' => DOWN
-      case x if x == 'L' => LEFT
-      case x if x == 'R' => RIGHT
-    }
-    Command(direction, rawMagnitude.toInt)
-  }
+    travelRec(wire.map(c => Command(c.head, c.tail.toInt)), IndexedSeq[Coord](START_POSITION))
 
   @scala.annotation.tailrec
   def travelRec(xs: List[Command], travelledCoords: IndexedSeq[Coord]): IndexedSeq[Coord] = xs match {
@@ -33,10 +22,14 @@ object CrossedWires {
 
   def drawLine(startCoord: Coord, command: Command): IndexedSeq[Coord] = {
     command.direction match {
-      case UP => for (i <- startCoord._2 + 1 to startCoord._2 + command.magnitude) yield new Coord(startCoord._1, i)
-      case DOWN => for (i <- startCoord._2 - 1 to startCoord._2 - command.magnitude by -1) yield new Coord(startCoord._1, i)
-      case LEFT => for (i <- startCoord._1 - 1 to startCoord._1 - command.magnitude by -1) yield new Coord(i, startCoord._2)
-      case RIGHT => for (i <- startCoord._1 + 1 to startCoord._1 + command.magnitude) yield new Coord(i, startCoord._2)
+      case x if x == 'U' =>
+        for (i <- startCoord._2 + 1 to startCoord._2 + command.magnitude) yield new Coord(startCoord._1, i)
+      case x if x == 'D' =>
+        for (i <- startCoord._2 - 1 to startCoord._2 - command.magnitude by -1) yield new Coord(startCoord._1, i)
+      case x if x == 'L' =>
+        for (i <- startCoord._1 - 1 to startCoord._1 - command.magnitude by -1) yield new Coord(i, startCoord._2)
+      case x if x == 'R' =>
+        for (i <- startCoord._1 + 1 to startCoord._1 + command.magnitude) yield new Coord(i, startCoord._2)
     }
   }
 
