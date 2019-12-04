@@ -2,21 +2,34 @@ package uk.co.hadoopathome.adventofcode19.day04
 
 import org.scalatest.FunSuite
 
-import scala.io.Source
-
 class SecureContainerTest extends FunSuite {
-  test("findNumValidPasswords one consecutive") {
+  test("findNumValidPasswordsTwoAdjacent one consecutive") {
     val range = 123454 to 123460
-    assert(SecureContainer.findNumValidPasswords(range) === 1)
+    assert(SecureContainer.findNumValidPasswordsTwoAdjacent(range) === 1)
   }
 
-  test("findNumValidPasswords increasing") {
+  test("findNumValidPasswordsTwoAdjacent increasing") {
     val range = 113454 to 113460
-    assert(SecureContainer.findNumValidPasswords(range) === 5)
+    assert(SecureContainer.findNumValidPasswordsTwoAdjacent(range) === 5)
   }
 
-  test("findNumValidPasswords part 1 real") {
+  test("findNumValidPasswordsTwoAdjacent part 1 real") {
     val range = 165432 to 707912
-    assert(SecureContainer.findNumValidPasswords(range) === 1716)
+    assert(SecureContainer.findNumValidPasswordsTwoAdjacent(range) === 1716)
+  }
+
+  test("findNumValidPasswordsMultipleAdjacent three consecutive") {
+    val range = 123334 to 123337
+    assert(SecureContainer.findNumValidPasswordsMultipleAdjacent(range) === 0)
+  }
+
+  test("findNumValidPasswordsMultipleAdjacent three consecutive with a separate two") {
+    val range = 113334 to 113337
+    assert(SecureContainer.findNumValidPasswordsMultipleAdjacent(range) === 4)
+  }
+
+  test("findNumValidPasswordsMultipleAdjacent part 2 real") {
+    val range = 165432 to 707912
+    assert(SecureContainer.findNumValidPasswordsMultipleAdjacent(range) === 1163)
   }
 }
