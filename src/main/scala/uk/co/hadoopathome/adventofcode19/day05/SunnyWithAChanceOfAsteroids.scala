@@ -1,17 +1,23 @@
 package uk.co.hadoopathome.adventofcode19.day05
 
 object SunnyWithAChanceOfAsteroids {
-  val INPUT_NUMBER = 1
+  var INPUT_NUMBER = 0
 
   case class Instruction(opcode: Int, modes: Set[Int])
 
-  def runProgram(ls: IndexedSeq[Int]): List[Int] = iterateProgramRec(0, ls, List[Int]())
+  def runProgram(ls: IndexedSeq[Int], inputNumber: Int): List[Int] = {
+    INPUT_NUMBER = inputNumber
+    iterateProgramRec(0, ls, List[Int]())
+  }
 
   def parseInstruction(i: Int): Instruction = {
-    if (i<100) Instruction(i, Set[Int]())
-    val commandStr = i.toString.reverse
-    val value = commandStr.tail.tail.zipWithIndex.filter(x => x._1 == '1').map(_._2).toSet
-    Instruction(commandStr.reverse.toInt % 100, value)
+    if (i==99) Instruction(99, Set[Int]())
+    else if (i < 9) Instruction(i, Set[Int]())
+    else {
+      val commandStr = i.toString.reverse
+      val value = commandStr.tail.tail.zipWithIndex.filter(x => x._1 == '1').map(_._2).toSet
+      Instruction(commandStr.reverse.toInt % 100, value)
+    }
   }
 
   @scala.annotation.tailrec
@@ -21,8 +27,26 @@ object SunnyWithAChanceOfAsteroids {
       case 99 => outputs
       case 1 => iterateProgramRec(i + 4, operate(i, ls, +, instructions.modes), outputs)
       case 2 => iterateProgramRec(i + 4, operate(i, ls, *, instructions.modes), outputs)
-      case 3 => iterateProgramRec(i + 2, ls.updated(ls(i+1), INPUT_NUMBER), outputs)
+      case 3 => iterateProgramRec(i + 2, ls.updated(ls(i + 1), INPUT_NUMBER), outputs)
       case 4 => iterateProgramRec(i + 2, ls, outputs :+ getValue(ls, i + 1, instructions.modes.contains(0)))
+      case 5 =>
+        val firstArg = getValue(ls, i + 1, instructions.modes.contains(0))
+        val secondArg = getValue(ls, i + 2, instructions.modes.contains(1))
+        if (firstArg != 0) iterateProgramRec(secondArg, ls, outputs) else iterateProgramRec(i + 3, ls, outputs)
+      case 6 =>
+        val firstArg = getValue(ls, i + 1, instructions.modes.contains(0))
+        val secondArg = getValue(ls, i + 2, instructions.modes.contains(1))
+        if (firstArg == 0) iterateProgramRec(secondArg, ls, outputs) else iterateProgramRec(i + 3, ls, outputs)
+      case 7 =>
+        val firstArg = getValue(ls, i + 1, instructions.modes.contains(0))
+        val secondArg = getValue(ls, i + 2, instructions.modes.contains(1))
+        val comparison = if (firstArg < secondArg) 1 else 0
+        iterateProgramRec(i + 4, ls.updated(ls(i + 3), comparison), outputs)
+      case 8 =>
+        val firstArg = getValue(ls, i + 1, instructions.modes.contains(0))
+        val secondArg = getValue(ls, i + 2, instructions.modes.contains(1))
+        val comparison = if (firstArg == secondArg) 1 else 0
+        iterateProgramRec(i + 4, ls.updated(ls(i + 3), comparison), outputs)
     }
   }
 
