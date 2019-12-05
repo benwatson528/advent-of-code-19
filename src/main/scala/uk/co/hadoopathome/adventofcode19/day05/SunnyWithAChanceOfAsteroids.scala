@@ -17,22 +17,12 @@ object SunnyWithAChanceOfAsteroids {
   @scala.annotation.tailrec
   private def iterateProgramRec(i: Int, ls: IndexedSeq[Int], outputs: List[Int]): List[Int] = {
     val instructions = parseInstruction(ls(i))
-    if (instructions.opcode == 99) {
-      println("OUTPUTS = "+outputs)
-      outputs
-    }
-    else if (instructions.opcode == 1) iterateProgramRec(i + 4, operate(i, ls, +, instructions.modes), outputs)
-    else if (instructions.opcode == 2) iterateProgramRec(i + 4, operate(i, ls, *, instructions.modes), outputs)
-    else if (instructions.opcode == 3) iterateProgramRec(i + 2, ls.updated(ls(i+1), INPUT_NUMBER), outputs)
-    else if (instructions.opcode == 4) {
-      if (i != 0) {
-        println("ERROR FOUND")
-      }
-      iterateProgramRec(i + 2, ls, outputs :+ ls(ls(i + 1)))
-    }
-    else {
-      println("TRAGIC ERROR")
-      outputs
+    instructions.opcode match {
+      case 99 => outputs
+      case 1 => iterateProgramRec(i + 4, operate(i, ls, +, instructions.modes), outputs)
+      case 2 => iterateProgramRec(i + 4, operate(i, ls, *, instructions.modes), outputs)
+      case 3 => iterateProgramRec(i + 2, ls.updated(ls(i+1), INPUT_NUMBER), outputs)
+      case 4 => iterateProgramRec(i + 2, ls, outputs :+ getValue(ls, i + 1, instructions.modes.contains(0)))
     }
   }
 
