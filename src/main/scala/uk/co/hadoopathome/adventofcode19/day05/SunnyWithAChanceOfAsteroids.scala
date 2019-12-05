@@ -8,30 +8,27 @@ object SunnyWithAChanceOfAsteroids {
     iterateProgramRec(0, ls, List[Int](), inputNumber)
   }
 
-  def parseInstruction(i: Int): Instruction = {
-    if (i == 99) Instruction(99, Set[Int]())
-    else if (i < 9) Instruction(i, Set[Int]())
-    else {
-      val commandStr = i.toString.reverse
-      val value = commandStr.tail.tail.zipWithIndex.filter(x => x._1 == '1').map(_._2).toSet
-      Instruction(commandStr.reverse.toInt % 100, value)
-    }
-  }
-
   @scala.annotation.tailrec
   private def iterateProgramRec(i: Int, ls: IndexedSeq[Int], outputs: List[Int], inputNumber: Int): List[Int] = {
     val instructions = parseInstruction(ls(i))
     instructions.opcode match {
-      case 99 => outputs
       case 1 => iterateProgramRec(i + 4, operate(i, ls, add, instructions.modes), outputs, inputNumber)
       case 2 => iterateProgramRec(i + 4, operate(i, ls, mult, instructions.modes), outputs, inputNumber)
       case 3 => iterateProgramRec(i + 2, ls.updated(ls(i + 1), inputNumber), outputs, inputNumber)
       case 4 => iterateProgramRec(i + 2, ls, outputs :+ getValues(ls, 1, i, instructions.modes).head, inputNumber)
-      case 5 => jump(i, ls, isJumpIfTrue = true, instructions.modes, outputs, inputNumber)
-      case 6 => jump(i, ls, isJumpIfTrue = false, instructions.modes, outputs, inputNumber)
+      case 5 => iterateProgramRec(jump(i, ls, isJumpIfTrue = true, instructions.modes), ls, outputs, inputNumber)
+      case 6 => iterateProgramRec(jump(i, ls, isJumpIfTrue = false, instructions.modes), ls, outputs, inputNumber)
       case 7 => checkEquality(i, ls, lt, instructions.modes, outputs, inputNumber)
       case 8 => checkEquality(i, ls, eq, instructions.modes, outputs, inputNumber)
+      case 99 => outputs
     }
+  }
+
+  def parseInstruction(i: Int): Instruction = {
+    val rawInstruction = i.toString
+    val values = for (i <- rawInstruction.length - 2 to 0 by -1; if (rawInstruction(i) == '1'))
+      yield rawInstruction.length - 3 - i
+    Instruction(i % 100, values.toSet)
   }
 
   private def getValues(ls: IndexedSeq[Int], numValues: Int, startIndex: Int, modes: Set[Int]): IndexedSeq[Int] =
@@ -42,14 +39,10 @@ object SunnyWithAChanceOfAsteroids {
     ls.updated(ls(startIndex + 3), fn(values(0), values(1)))
   }
 
-  private def jump(startIndex: Int, ls: IndexedSeq[Int], isJumpIfTrue: Boolean, modes: Set[Int], outputs: List[Int],
-                   inputNumber: Int): List[Int] = {
+  private def jump(startIndex: Int, ls: IndexedSeq[Int], isJumpIfTrue: Boolean, modes: Set[Int]): Int = {
     val values = getValues(ls, 2, startIndex, modes)
-    val doJump = if (isJumpIfTrue) values(0) != 0 else values(0) == 0
-    if (doJump)
-      iterateProgramRec(values(1), ls, outputs, inputNumber)
-    else
-      iterateProgramRec(startIndex + 3, ls, outputs, inputNumber)
+    val comparison = if (isJumpIfTrue) values(0) != 0 else values(0) == 0
+    if (comparison) values(1) else startIndex + 3
   }
 
   private def checkEquality(startIndex: Int, ls: IndexedSeq[Int], fn: (Int, Int) => Boolean, modes: Set[Int],

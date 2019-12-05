@@ -13,7 +13,7 @@ class SunnyWithAChanceOfAsteroidsTest extends FunSuite {
 
   test("runProgram complex opcode 2 instruction") {
     val input = splitInput("1002,4,3,4,33")
-    assert(SunnyWithAChanceOfAsteroids.runProgram(input, 1)=== List())
+    assert(SunnyWithAChanceOfAsteroids.runProgram(input, 1) === List())
   }
 
   test("runProgram complex opcode 3 instruction") {
