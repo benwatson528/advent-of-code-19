@@ -31,9 +31,6 @@ object SunnyWithAChanceOfAsteroids {
     Instruction(i % 100, values.toSet)
   }
 
-  private def getValues(ls: IndexedSeq[Int], numValues: Int, startIndex: Int, modes: Set[Int]): IndexedSeq[Int] =
-    for (i <- 0 until numValues) yield if (modes.contains(i)) ls(startIndex + i + 1) else ls(ls(startIndex + i + 1))
-
   private def operate(startIndex: Int, ls: IndexedSeq[Int], fn: (Int, Int) => Int, modes: Set[Int]): IndexedSeq[Int] = {
     val values = getValues(ls, 2, startIndex, modes)
     ls.updated(ls(startIndex + 3), fn(values(0), values(1)))
@@ -51,6 +48,9 @@ object SunnyWithAChanceOfAsteroids {
     val comparison = if (fn(values(0), values(1))) 1 else 0
     iterateProgramRec(startIndex + 4, ls.updated(ls(startIndex + 3), comparison), outputs, inputNumber)
   }
+
+  private def getValues(ls: IndexedSeq[Int], numValues: Int, startIndex: Int, modes: Set[Int]): IndexedSeq[Int] =
+    for (i <- 0 until numValues) yield if (modes.contains(i)) ls(startIndex + i + 1) else ls(ls(startIndex + i + 1))
 
   private val add = (a: Int, b: Int) => a + b
   private val mult = (a: Int, b: Int) => a * b
