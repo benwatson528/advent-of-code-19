@@ -1,0 +1,17 @@
+package uk.co.hadoopathome.adventofcode19.day06
+
+import org.scalatest.FunSuite
+
+import scala.io.Source
+
+class UniversalOrbitMapTest extends FunSuite {
+  test("countOrbits test") {
+    val input = "COM)B B)C C)D D)E E)F B)G G)H D)I E)J J)K K)L".split(" ").toList
+    assert(UniversalOrbitMap.countOrbits(input) === 42)
+  }
+
+  test("countOrbits part 1 real") {
+    val input = Source.fromResource("day06/input.txt").getLines.toList
+    assert(UniversalOrbitMap.countOrbits(input) === 117672)
+  }
+}
