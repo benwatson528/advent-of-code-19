@@ -5,7 +5,7 @@ import scala.sys.process.Process
 import scala.util.Using
 
 object DaySetup extends App {
-  val day = 6.toString
+  val day = 7.toString
   val puzzleUrl = "https://adventofcode.com/2019/day/" + day
   val puzzleName = getPuzzleName(puzzleUrl)
 
