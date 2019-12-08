@@ -11,7 +11,6 @@ object AmplificationCircuit {
   def maxSignalFeedbackLoop(ls: IndexedSeq[Int]): Int =
     List(5, 6, 7, 8, 9).permutations.toList.map(runFeedbackLoop(ls, _)).max
 
-
   private def runFeedbackLoop(ls: IndexedSeq[Int], phaseSettings: List[Int]): Int = {
     val programStates = initialiseProgramStates(ls, phaseSettings)
     var lastOutput = 0
@@ -30,9 +29,9 @@ object AmplificationCircuit {
     -1
   }
 
-  private def initialiseProgramStates(ls: IndexedSeq[Int], phaseSettings: List[Int]): mutable.Queue[ProgramState] = {
-    new mutable.Queue[ProgramState].enqueueAll(phaseSettings.map(ps => ProgramState(0, ls, List(ps), None, isFinished = false)))
-  }
+  private def initialiseProgramStates(ls: IndexedSeq[Int], phaseSettings: List[Int]): mutable.Queue[ProgramState] =
+    new mutable.Queue[ProgramState].enqueueAll(
+      phaseSettings.map(ps => ProgramState(0, ls, List(ps), None, isFinished = false)))
 
   @scala.annotation.tailrec
   private def runAmplifierRec(ls: IndexedSeq[Int], output: Int, phaseSettings: List[Int]): Int =
