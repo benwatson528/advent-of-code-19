@@ -1,7 +1,6 @@
 package uk.co.hadoopathome.adventofcode19.day08
 
 object SpaceImageFormat {
-  type Layer = List[Int]
 
   def checkCorruption(ls: List[Int], width: Int, height: Int): Int = {
     val layers = ls.grouped(width * height).toList
@@ -9,7 +8,7 @@ object SpaceImageFormat {
     fewestZeros.count(_ == 1) * fewestZeros.count(_ == 2)
   }
 
-  def decode(ls: Layer, width: Int, height: Int): Layer = {
+  def decode(ls: List[Int], width: Int, height: Int): List[Int] = {
     val layers = ls.grouped(width * height).toList
     val superimposed = for (i <- layers.head.indices) yield layers.map(_ (i))
     superimposed.map(_.find(_ != 2).getOrElse(2)).toList

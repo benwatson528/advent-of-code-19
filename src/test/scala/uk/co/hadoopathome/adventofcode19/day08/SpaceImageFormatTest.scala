@@ -1,7 +1,6 @@
 package uk.co.hadoopathome.adventofcode19.day08
 
 import org.scalatest.FunSuite
-import uk.co.hadoopathome.adventofcode19.day08.SpaceImageFormat.Layer
 
 import scala.io.Source
 
@@ -28,11 +27,11 @@ class SpaceImageFormatTest extends FunSuite {
 
   private def parseInput(input: String): List[Int] = input.toString.map(_.asDigit).toList
 
-  private def printImage(flattenedImage: Layer, width: Int, height: Int): Unit = {
+  private def printImage(flattenedImage: List[Int], width: Int, height: Int): Unit = {
     for (y <- 0 until height) {
       println()
-      for (x <-0 until width) {
-        print(if (flattenedImage((y*width) + x) == 0) " " else "*")
+      for (x <- 0 until width) {
+        print(if (flattenedImage((y * width) + x) == 0) " " else "*")
       }
     }
   }
