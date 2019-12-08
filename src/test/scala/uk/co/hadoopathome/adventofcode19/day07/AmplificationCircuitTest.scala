@@ -41,5 +41,5 @@ class AmplificationCircuitTest extends FunSuite {
 //    assert(AmplificationCircuit.maxSignalFeedbackLoop(input) === 225056)
 //  }
 
-  private def parseInput(input: String): IndexedSeq[Int] = input.split(",").map(_.toInt).toIndexedSeq
+  private def parseInput(input: String): IndexedSeq[Int] = input.split(",").map(_.toInt)
 }
