@@ -31,7 +31,7 @@ class SpaceImageFormatTest extends FunSuite {
     for (y <- 0 until height) {
       println()
       for (x <- 0 until width) {
-        print(if (flattenedImage((y * width) + x) == 0) " " else "*")
+        print(if (flattenedImage((y * width) + x) == 1) "*" else " ")
       }
     }
   }
