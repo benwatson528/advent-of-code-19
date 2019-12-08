@@ -2,7 +2,7 @@ package uk.co.hadoopathome.adventofcode19.day05
 
 object SunnyWithAChanceOfAsteroids {
 
-  case class ProgramState(pointer: Int, ls: IndexedSeq[Int], inputs: List[Int], output: Int, isFinished: Boolean)
+  case class ProgramState(pointer: Int, ls: IndexedSeq[Int], inputs: List[Int], output: Option[Int], isFinished: Boolean)
 
   private case class Instruction(opcode: Int, modes: Set[Int])
 
@@ -35,12 +35,12 @@ object SunnyWithAChanceOfAsteroids {
       case 1 => iterateProgramPauseRec(i + 4, operate(i, ls, add, instructions.modes), inputs)
       case 2 => iterateProgramPauseRec(i + 4, operate(i, ls, mult, instructions.modes), inputs)
       case 3 => iterateProgramPauseRec(i + 2, ls.updated(ls(i + 1), inputs.head), inputs.tail)
-      case 4 => ProgramState(i + 2, ls, inputs, getValues(ls, 1, i, instructions.modes).head, isFinished = false)
+      case 4 => ProgramState(i + 2, ls, inputs, Some(getValues(ls, 1, i, instructions.modes).head), isFinished = false)
       case 5 => iterateProgramPauseRec(jump(i, ls, isJumpIfTrue = true, instructions.modes), ls, inputs)
       case 6 => iterateProgramPauseRec(jump(i, ls, isJumpIfTrue = false, instructions.modes), ls, inputs)
       case 7 => checkEqualityPause(i, ls, lt, instructions.modes, inputs)
       case 8 => checkEqualityPause(i, ls, eq, instructions.modes, inputs)
-      case 99 => ProgramState(-1, ls, List[Int](), -1, isFinished = true)
+      case 99 => ProgramState(0, ls, List[Int](), None, isFinished = true)
     }
   }
 
