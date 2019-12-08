@@ -3,12 +3,15 @@ package uk.co.hadoopathome.adventofcode19.day08
 object SpaceImageFormat {
   type Layer = List[Int]
 
-  def checkCorruption(ls: Layer, width: Int, height: Int): Int = {
-    val pixelsPerLayer = width * height
-    val layers = ls.grouped(pixelsPerLayer)
-    val fewestZeros = layers.reduceLeft(minZeros)
+  def checkCorruption(ls: List[Int], width: Int, height: Int): Int = {
+    val layers = ls.grouped(width * height).toList
+    val fewestZeros = layers.reduceLeft((a, b) => if (a.count(_ == 0) < b.count(_ == 0)) a else b)
     fewestZeros.count(_ == 1) * fewestZeros.count(_ == 2)
   }
 
-  private def minZeros(ls1: Layer, ls2: Layer): Layer = if (ls1.count(_ == 0) < ls2.count(_ == 0)) ls1 else ls2
+  def decode(ls: Layer, width: Int, height: Int): Layer = {
+    val layers = ls.grouped(width * height).toList
+    val superimposed = for (i <- layers.head.indices) yield layers.map(_ (i))
+    superimposed.map(_.find(_ != 2).getOrElse(2)).toList
+  }
 }
