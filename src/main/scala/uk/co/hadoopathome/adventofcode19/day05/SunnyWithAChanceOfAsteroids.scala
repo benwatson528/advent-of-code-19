@@ -2,25 +2,45 @@ package uk.co.hadoopathome.adventofcode19.day05
 
 object SunnyWithAChanceOfAsteroids {
 
+  case class ProgramState(pointer: Int, ls: IndexedSeq[Int], inputs: List[Int], output: Int, isFinished: Boolean)
+
   private case class Instruction(opcode: Int, modes: Set[Int])
 
-  def runProgram(ls: IndexedSeq[Int], inputNumbers: List[Int]): Int = {
+  def runProgram(ls: IndexedSeq[Int], inputNumbers: List[Int]): Int =
     iterateProgramRec(0, ls, List[Int](), inputNumbers).last
+
+  def runProgramPause(programState: ProgramState): ProgramState =
+    iterateProgramPauseRec(programState.pointer, programState.ls, programState.inputs)
+
+  @scala.annotation.tailrec
+  private def iterateProgramRec(i: Int, ls: IndexedSeq[Int], outputs: List[Int], inputs: List[Int]): List[Int] = {
+    val instructions = parseInstruction(ls(i))
+    instructions.opcode match {
+      case 1 => iterateProgramRec(i + 4, operate(i, ls, add, instructions.modes), outputs, inputs)
+      case 2 => iterateProgramRec(i + 4, operate(i, ls, mult, instructions.modes), outputs, inputs)
+      case 3 => iterateProgramRec(i + 2, ls.updated(ls(i + 1), inputs.head), outputs, inputs.tail)
+      case 4 => iterateProgramRec(i + 2, ls, outputs :+ getValues(ls, 1, i, instructions.modes).head, inputs)
+      case 5 => iterateProgramRec(jump(i, ls, isJumpIfTrue = true, instructions.modes), ls, outputs, inputs)
+      case 6 => iterateProgramRec(jump(i, ls, isJumpIfTrue = false, instructions.modes), ls, outputs, inputs)
+      case 7 => checkEquality(i, ls, lt, instructions.modes, outputs, inputs)
+      case 8 => checkEquality(i, ls, eq, instructions.modes, outputs, inputs)
+      case 99 => outputs
+    }
   }
 
   @scala.annotation.tailrec
-  private def iterateProgramRec(i: Int, ls: IndexedSeq[Int], outputs: List[Int], inputNumbers: List[Int]): List[Int] = {
+  private def iterateProgramPauseRec(i: Int, ls: IndexedSeq[Int], inputs: List[Int]): ProgramState = {
     val instructions = parseInstruction(ls(i))
     instructions.opcode match {
-      case 1 => iterateProgramRec(i + 4, operate(i, ls, add, instructions.modes), outputs, inputNumbers)
-      case 2 => iterateProgramRec(i + 4, operate(i, ls, mult, instructions.modes), outputs, inputNumbers)
-      case 3 => iterateProgramRec(i + 2, ls.updated(ls(i + 1), inputNumbers.head), outputs, inputNumbers.tail)
-      case 4 => iterateProgramRec(i + 2, ls, outputs :+ getValues(ls, 1, i, instructions.modes).head, inputNumbers)
-      case 5 => iterateProgramRec(jump(i, ls, isJumpIfTrue = true, instructions.modes), ls, outputs, inputNumbers)
-      case 6 => iterateProgramRec(jump(i, ls, isJumpIfTrue = false, instructions.modes), ls, outputs, inputNumbers)
-      case 7 => checkEquality(i, ls, lt, instructions.modes, outputs, inputNumbers)
-      case 8 => checkEquality(i, ls, eq, instructions.modes, outputs, inputNumbers)
-      case 99 => outputs
+      case 1 => iterateProgramPauseRec(i + 4, operate(i, ls, add, instructions.modes), inputs)
+      case 2 => iterateProgramPauseRec(i + 4, operate(i, ls, mult, instructions.modes), inputs)
+      case 3 => iterateProgramPauseRec(i + 2, ls.updated(ls(i + 1), inputs.head), inputs.tail)
+      case 4 => ProgramState(i + 2, ls, inputs, getValues(ls, 1, i, instructions.modes).head, isFinished = false)
+      case 5 => iterateProgramPauseRec(jump(i, ls, isJumpIfTrue = true, instructions.modes), ls, inputs)
+      case 6 => iterateProgramPauseRec(jump(i, ls, isJumpIfTrue = false, instructions.modes), ls, inputs)
+      case 7 => checkEqualityPause(i, ls, lt, instructions.modes, inputs)
+      case 8 => checkEqualityPause(i, ls, eq, instructions.modes, inputs)
+      case 99 => ProgramState(-1, ls, List[Int](), -1, isFinished = true)
     }
   }
 
@@ -43,10 +63,17 @@ object SunnyWithAChanceOfAsteroids {
   }
 
   private def checkEquality(startIndex: Int, ls: IndexedSeq[Int], fn: (Int, Int) => Boolean, modes: Set[Int],
-                            outputs: List[Int], inputNumbers: List[Int]): List[Int] = {
+                            outputs: List[Int], inputs: List[Int]): List[Int] = {
     val values = getValues(ls, 2, startIndex, modes)
     val comparison = if (fn(values(0), values(1))) 1 else 0
-    iterateProgramRec(startIndex + 4, ls.updated(ls(startIndex + 3), comparison), outputs, inputNumbers)
+    iterateProgramRec(startIndex + 4, ls.updated(ls(startIndex + 3), comparison), outputs, inputs)
+  }
+
+  private def checkEqualityPause(startIndex: Int, ls: IndexedSeq[Int], fn: (Int, Int) => Boolean, modes: Set[Int],
+                                 inputs: List[Int]): ProgramState = {
+    val values = getValues(ls, 2, startIndex, modes)
+    val comparison = if (fn(values(0), values(1))) 1 else 0
+    iterateProgramPauseRec(startIndex + 4, ls.updated(ls(startIndex + 3), comparison), inputs)
   }
 
   private def getValues(ls: IndexedSeq[Int], numValues: Int, startIndex: Int, modes: Set[Int]): IndexedSeq[Int] =
