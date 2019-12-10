@@ -2,41 +2,39 @@ package uk.co.hadoopathome.adventofcode19.day05
 
 import scala.collection.mutable.ListBuffer
 
-class Amplifier(phaseSetting: List[Long] = List[Long]()) {
+class Amplifier(initialInputs: List[Long] = List[Long]()) {
 
-  def this(phaseSetting: Long) {
-    this(List[Long](phaseSetting))
+  def this(initialInput: Long) {
+    this(List[Long](initialInput))
   }
 
-  case class ProgramState(pointer: Int, ls: List[Long], inputs: List[Long], isFinished: Boolean)
+  case class ProgramState(pointer: Int, ls: Map[Int, Long], inputs: List[Long], isFinished: Boolean)
 
   private case class Instruction(opcode: Long, immediateModes: Set[Int], relativeModes: Set[Int])
 
   private val outputs = new ListBuffer[Long]()
   private var relativeBase = 0L
 
-  def runUntilCompletion(ls: List[Long], input: Long): Long = runUntilOutputRec(ProgramState(0, ls, phaseSetting :+ input,
+  def runUntilCompletion(ls: List[Long], input: Long): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls),
+    initialInputs :+ input,
     isFinished = false))
 
-  def runUntilCompletion(ls: List[Long]): Long = runUntilOutputRec(ProgramState(0, ls, phaseSetting, isFinished = false))
+  def runUntilCompletion(ls: List[Long]): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls), initialInputs,
+    isFinished = false))
 
   @scala.annotation.tailrec
   private def runUntilOutputRec(programState: ProgramState): Long = {
-    if (programState.isFinished) {
-      print("OUTPUTS = " + outputs)
-      outputs.last
-    }
-    else
-      runUntilOutputRec(iterateProgramRec(programState.pointer, programState.ls, programState.inputs))
+    if (programState.isFinished) outputs.last
+    else runUntilOutputRec(iterateProgramRec(programState.pointer, programState.ls, programState.inputs))
   }
 
   @scala.annotation.tailrec
-  private def iterateProgramRec(i: Int, ls: List[Long], inputs: List[Long]): ProgramState = {
+  private def iterateProgramRec(i: Int, ls: Map[Int, Long], inputs: List[Long]): ProgramState = {
     val instruction = parseInstruction(ls(i))
     instruction.opcode match {
       case 1 => iterateProgramRec(i + 4, operate(i, ls, add, instruction), inputs)
       case 2 => iterateProgramRec(i + 4, operate(i, ls, mult, instruction), inputs)
-      case 3 => iterateProgramRec(i + 2, writeValue(i + 1, inputs.head, ls, instruction), inputs.tail)
+      case 3 => iterateProgramRec(i + 2, writeValue(i, 1, inputs.head, ls, instruction), inputs.tail)
       case 4 =>
         outputs += readValues(1, i, ls, instruction).head
         ProgramState(i + 2, ls, inputs, isFinished = false)
@@ -60,25 +58,28 @@ class Amplifier(phaseSetting: List[Long] = List[Long]()) {
     Instruction(i % 100, immediateModes.toSet, relativeModes.toSet)
   }
 
-  private def operate(startIndex: Int, ls: List[Long], fn: (Long, Long) => Long, instruction: Instruction): List[Long] = {
+  private def operate(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Long,
+                      instruction: Instruction): Map[Int, Long] = {
     val values = readValues(2, startIndex, ls, instruction)
-     writeValue(startIndex + 3, fn(values(0), values(1)), ls, instruction)
+    writeValue(startIndex, 3, fn(values(0), values(1)), ls, instruction)
   }
 
-  private def jump(startIndex: Int, ls: List[Long], isJumpIfTrue: Boolean, instruction: Instruction): Long = {
+  private def jump(startIndex: Int, ls: Map[Int, Long], isJumpIfTrue: Boolean, instruction: Instruction): Long = {
     val values = readValues(2, startIndex, ls, instruction)
     val comparison = if (isJumpIfTrue) values(0) != 0 else values(0) == 0
     if (comparison) values(1) else startIndex + 3
   }
 
-  private def checkEquality(startIndex: Int, ls: List[Long], fn: (Long, Long) => Boolean, instruction: Instruction,
+  private def checkEquality(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Boolean, instruction: Instruction,
                             inputs: List[Long]): ProgramState = {
     val values = readValues(2, startIndex, ls, instruction)
     val comparison = if (fn(values(0), values(1))) 1 else 0
-    iterateProgramRec(startIndex + 4, writeValue(startIndex + 3, comparison, ls, instruction), inputs)
+    val value = writeValue(startIndex, 3, comparison, ls, instruction)
+    iterateProgramRec(startIndex + 4, value, inputs)
   }
 
-  private def readValues(numValues: Int, startIndex: Int, ls: List[Long], instruction: Instruction): IndexedSeq[Long] = {
+  private def readValues(numValues: Int, startIndex: Int, ls: Map[Int, Long],
+                         instruction: Instruction): IndexedSeq[Long] = {
     for (i <- 0 until numValues) yield {
       val rootIndex = startIndex + i + 1
       if (instruction.immediateModes.contains(i))
@@ -90,12 +91,16 @@ class Amplifier(phaseSetting: List[Long] = List[Long]()) {
     }
   }
 
-  private def writeValue(index: Int, value: Long, ls: List[Long], instruction: Instruction): List[Long] = {
-    if (instruction.relativeModes.contains(index - 1))
-      ls.updated(ls(index).toInt + relativeBase.toInt, value)
+  private def writeValue(startIndex: Int, subIndex: Int, value: Long, ls: Map[Int, Long],
+                         instruction: Instruction): Map[Int, Long] = {
+    if (instruction.relativeModes.contains(subIndex - 1))
+      ls.updated(ls(startIndex + subIndex).toInt + relativeBase.toInt, value)
     else
-      ls.updated(ls(index).toInt, value)
+      ls.updated(ls(startIndex + subIndex).toInt, value)
   }
+
+  private def convertInputToMap(ls: List[Long]): Map[Int, Long] =
+    ls.zipWithIndex.map { case (value, i) => (i, value) }.toMap.withDefaultValue(0L)
 
   private val add = (a: Long, b: Long) => a + b
   private val mult = (a: Long, b: Long) => a * b
