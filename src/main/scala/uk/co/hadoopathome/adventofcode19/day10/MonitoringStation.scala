@@ -21,7 +21,7 @@ object MonitoringStation {
   private def removeElementsRec(ls: List[List[(Double, Coord)]], numRemoved: Int, desiredAsteroid: Int): (Double, Coord) =
     numRemoved match {
       case x if x + ls.size < desiredAsteroid => removeElementsRec(ls.map(_.tail), numRemoved + ls.size, desiredAsteroid)
-      case x if x + ls.size >= desiredAsteroid => ls(desiredAsteroid - numRemoved - 1).head
+      case _ => ls(desiredAsteroid - numRemoved - 1).head
     }
 
   private def getAsteroidsInView(baseAsteroid: Coord, allAsteroids: List[Coord]): Int =
