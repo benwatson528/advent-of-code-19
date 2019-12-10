@@ -4,11 +4,10 @@ import scala.collection.immutable.SortedMap
 
 object MonitoringStation {
 
-  def findSafestAsteroid(grid: Grid): (Coord, Int) = {
+  def findSafestAsteroid(grid: Grid): (Coord, Int) =
     getAsteroids(grid)
         .map(baseAsteroid => (baseAsteroid, getAsteroidsInView(baseAsteroid, getAsteroids(grid, baseAsteroid))))
         .maxBy(_._2)
-  }
 
   def vaporiseAsteroids(grid: Grid, base: Coord, desiredAsteroid: Int): Coord = {
     val asteroidsByAngle = getAsteroids(grid, base).map(a => (angleBetweenPoints(a, base), a)).sortBy(_._1)
