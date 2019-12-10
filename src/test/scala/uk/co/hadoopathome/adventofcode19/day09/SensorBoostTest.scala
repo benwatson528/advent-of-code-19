@@ -10,6 +10,11 @@ class SensorBoostTest extends FunSuite {
     assert(SensorBoost.runIntCode(input) === 109L)
   }
 
+  test("runIntCode outputs its input") {
+    val input = splitInput("109,1,203,11,209,8,204,1,99,10,0,42,0")
+    assert(SensorBoost.runIntCode(input, 10) === 10L)
+  }
+
   test("runIntCode 16 digit output") {
     val input = splitInput("1102,34915192,34915192,7,4,7,99,0")
     assert(SensorBoost.runIntCode(input) === 1219070632396864L)
