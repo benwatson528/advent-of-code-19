@@ -13,6 +13,7 @@ class Amplifier(initialInputs: List[Long] = List[Long]()) {
   private case class Instruction(opcode: Long, immediateModes: Set[Int], relativeModes: Set[Int])
 
   private val outputs = new ListBuffer[Long]()
+  private var lastProgramState = ProgramState(0, Map[Int, Long](), List[Long](), isFinished = false)
   private var relativeBase = 0L
 
   def runUntilCompletion(ls: List[Long], input: Long): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls),
@@ -21,6 +22,16 @@ class Amplifier(initialInputs: List[Long] = List[Long]()) {
 
   def runUntilCompletion(ls: List[Long]): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls), initialInputs,
     isFinished = false))
+
+  def runWithPause(ls: List[Long], input: Long): (Long, Boolean) = {
+    lastProgramState = iterateProgramRec(0, convertInputToMap(ls), initialInputs :+ input)
+    (outputs.last, lastProgramState.isFinished)
+  }
+
+  def runWithPause(input: Long): (Long, Boolean) = {
+    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.ls, lastProgramState.inputs :+ input)
+    (outputs.last, lastProgramState.isFinished)
+  }
 
   @scala.annotation.tailrec
   private def runUntilOutputRec(programState: ProgramState): Long = {
@@ -45,7 +56,7 @@ class Amplifier(initialInputs: List[Long] = List[Long]()) {
       case 9 =>
         relativeBase += readValues(1, i, ls, instruction).head
         iterateProgramRec(i + 2, ls, inputs)
-      case 99 => ProgramState(0, ls, List[Long](), isFinished = true)
+      case 99 => ProgramState(i, ls, inputs, isFinished = true)
     }
   }
 
