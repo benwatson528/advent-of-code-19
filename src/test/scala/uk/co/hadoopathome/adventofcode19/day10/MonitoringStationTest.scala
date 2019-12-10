@@ -28,7 +28,25 @@ class MonitoringStationTest extends FunSuite {
   test("findSafestAsteroid real") {
     val input = Source.fromResource("day10/real-input.txt").getLines.toList
     val grid = parseInput(input)
-    assert(MonitoringStation.findSafestAsteroid(grid)._2 === 303)
+    assert(MonitoringStation.findSafestAsteroid(grid) === (Coord(26, 29), 303))
+  }
+
+  test("vaporiseAsteroids small example") {
+    val input = Source.fromResource("day10/vaporise-input.txt").getLines.toList
+    val grid = parseInput(input)
+    assert(MonitoringStation.vaporiseAsteroids(grid, Coord(8, 3), 18) === (Coord(4, 4)))
+  }
+
+  test("vaporiseAsteroids large example") {
+    val input = Source.fromResource("day10/large-input.txt").getLines.toList
+    val grid = parseInput(input)
+    assert(MonitoringStation.vaporiseAsteroids(grid, Coord(11, 13), 200) === (Coord(8, 2)))
+  }
+
+  test("vaporiseAsteroids real") {
+    val input = Source.fromResource("day10/real-input.txt").getLines.toList
+    val grid = parseInput(input)
+    assert(MonitoringStation.vaporiseAsteroids(grid, Coord(26, 29), 200) === (Coord(4, 8)))
   }
 
   private def parseInput(input: List[String]): Grid = {
@@ -40,17 +58,5 @@ class MonitoringStationTest extends FunSuite {
       }
     }
     map
-  }
-
-  private def printSpace(grid: Grid): Unit = {
-    val width = grid.maxBy(p => p._1.x)._1.x
-    val height = grid.maxBy(p => p._1.y)._1.y
-
-    for (y <- 0 to height) {
-      println()
-      for (x <- 0 to width) {
-        print(if (grid(Coord(x, y)) == Asteroid) "#" else ".")
-      }
-    }
   }
 }
