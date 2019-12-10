@@ -37,6 +37,11 @@ destination_resources="${PROJECT_ROOT}/src/test/resources/${day}"
 main_class_name="${class_name}.scala"
 test_class_name="${class_name}Test.scala"
 
+if [ -d "${destination_main}" ]; then
+  echo "Folder already exists, exiting"
+  exit 1
+fi
+
 mkdir ${destination_main}
 cp ${TEMPLATE_DIR}/MainClass.scala ${destination_main}/${main_class_name}
 echo "Creating dev class ${destination_main}/${main_class_name}"
