@@ -10,7 +10,6 @@ object SpaceImageFormat {
 
   def decode(ls: List[Int], width: Int, height: Int): List[Int] = {
     val layers = ls.grouped(width * height).toList
-    val superimposed = for (i <- layers.head.indices) yield layers.map(_ (i))
-    superimposed.map(_.find(_ != 2).getOrElse(2)).toList
+      layers.transpose.map(_.find(_ != 2).getOrElse(2))
   }
 }
