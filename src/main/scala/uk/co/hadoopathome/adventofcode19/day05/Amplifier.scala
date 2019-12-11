@@ -2,41 +2,31 @@ package uk.co.hadoopathome.adventofcode19.day05
 
 import scala.collection.mutable.ListBuffer
 
-class Amplifier(initialInputs: List[Long] = List[Long]()) {
+class Amplifier(initialProgram: List[Long] = List[Long](), initialInputs: List[Long] = List[Long]()) {
 
-  def this(initialInput: Long) {
-    this(List[Long](initialInput))
+  def this(initialProgram: List[Long], initialInput: Long) {
+    this(initialProgram, List[Long](initialInput))
   }
 
-  case class ProgramState(pointer: Int, ls: Map[Int, Long], inputs: List[Long], isFinished: Boolean)
+  case class ProgramState(pointer: Int, program: Map[Int, Long], inputs: List[Long], isFinished: Boolean)
 
   private case class Instruction(opcode: Long, immediateModes: Set[Int], relativeModes: Set[Int])
 
   private val outputs = new ListBuffer[Long]()
-  private var lastProgramState = ProgramState(0, Map[Int, Long](), List[Long](), isFinished = false)
+  private var lastProgramState = ProgramState(0, convertInputToMap(initialProgram), initialInputs, isFinished = false)
   private var relativeBase = 0L
 
-  def runUntilCompletion(ls: List[Long], input: Long): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls),
-    initialInputs :+ input,
-    isFinished = false))
-
-  def runUntilCompletion(ls: List[Long]): Long = runUntilOutputRec(ProgramState(0, convertInputToMap(ls), initialInputs,
-    isFinished = false))
-
-  def runWithPause(ls: List[Long], input: Long): (Long, Boolean) = {
-    lastProgramState = iterateProgramRec(0, convertInputToMap(ls), initialInputs :+ input)
-    (outputs.last, lastProgramState.isFinished)
-  }
+  def runUntilCompletion(): Long = runUntilOutputRec(lastProgramState)
 
   def runWithPause(input: Long): (Long, Boolean) = {
-    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.ls, lastProgramState.inputs :+ input)
+    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program, lastProgramState.inputs :+ input)
     (outputs.last, lastProgramState.isFinished)
   }
 
   @scala.annotation.tailrec
   private def runUntilOutputRec(programState: ProgramState): Long = {
     if (programState.isFinished) outputs.last
-    else runUntilOutputRec(iterateProgramRec(programState.pointer, programState.ls, programState.inputs))
+    else runUntilOutputRec(iterateProgramRec(programState.pointer, programState.program, programState.inputs))
   }
 
   @scala.annotation.tailrec

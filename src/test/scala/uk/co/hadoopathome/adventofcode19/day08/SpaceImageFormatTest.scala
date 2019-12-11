@@ -22,7 +22,7 @@ class SpaceImageFormatTest extends FunSuite {
 
   test("decode real") {
     val input = parseInput(Source.fromResource("day08/input.txt").getLines.next())
-    printImage(SpaceImageFormat.decode(input, 25, 6), 25, 6)
+    //printImage(SpaceImageFormat.decode(input, 25, 6), 25, 6)
   }
 
   private def parseInput(input: String): List[Int] = input.toString.map(_.asDigit).toList
