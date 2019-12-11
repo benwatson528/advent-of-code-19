@@ -13,26 +13,26 @@ object SpacePolice {
   private val CENTRE = Coord(0, 0)
 
   def findNumPaintedPanels(ls: List[Long]): Int = {
-    val amplifier = new Intcode(ls)
+    val intcode = new Intcode(ls)
     val robot = (CENTRE, '^')
-    paintRec(robot, amplifier, Map[Coord, Int](CENTRE -> 0)).size
+    paintRec(robot, intcode, Map[Coord, Int](CENTRE -> 0)).size
   }
 
   def drawRegistration(ls: List[Long]): Map[Coord, Int] = {
-    val amplifier = new Intcode(ls)
+    val intcode = new Intcode(ls)
     val robot = (CENTRE, '^')
-    paintRec(robot, amplifier, Map[Coord, Int](CENTRE -> 1))
+    paintRec(robot, intcode, Map[Coord, Int](CENTRE -> 1))
   }
 
   @scala.annotation.tailrec
-  private def paintRec(robot: Robot, amplifier: Intcode, painted: Map[Coord, Int]): Map[Coord, Int] = {
+  private def paintRec(robot: Robot, intcode: Intcode, painted: Map[Coord, Int]): Map[Coord, Int] = {
     val currentColour = painted.getOrElse(robot._1, 0)
-    val (newColour, isFinished) = amplifier.runWithPause(currentColour)
+    val (newColour, isFinished) = intcode.runWithPause(currentColour)
     val updatedPainted = if (currentColour != newColour.toInt) painted + (robot._1 -> newColour.toInt) else painted
     if (isFinished) return updatedPainted
-    val turnDirection = amplifier.runWithPause()._1.toInt
+    val turnDirection = intcode.runWithPause()._1.toInt
     val newRobot = moveRobot(turnRobot(robot, turnDirection))
-    paintRec(newRobot, amplifier, updatedPainted)
+    paintRec(newRobot, intcode, updatedPainted)
   }
 
   private def turnRobot(robot: Robot, turnDirection: Int): Robot = turnDirection match {
