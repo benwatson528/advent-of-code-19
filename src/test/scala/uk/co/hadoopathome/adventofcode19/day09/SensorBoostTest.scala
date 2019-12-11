@@ -30,7 +30,7 @@ class SensorBoostTest extends FunSuite {
     assert(SensorBoost.runIntCode(input) === 1219070632396864L)
   }
 
-  ignore("runIntCode sensor boost real - ignored because IntelliJ throws SO (works in SBT)") {
+  test("runIntCode sensor boost real - ignored because IntelliJ throws SO (works in SBT)") {
     val input = splitInput(Source.fromResource("day09/input.txt").getLines.next)
     assert(SensorBoost.runIntCode(input, 2) === 63441L)
   }

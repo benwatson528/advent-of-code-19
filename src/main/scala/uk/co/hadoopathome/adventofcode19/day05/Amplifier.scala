@@ -47,8 +47,8 @@ class Amplifier(initialProgram: List[Long] = List[Long](), initialInputs: List[L
         ProgramState(i + 2, ls, inputs, isFinished = false)
       case 5 => iterateProgramRec(jump(i, ls, isJumpIfTrue = true, instruction).toInt, ls, inputs)
       case 6 => iterateProgramRec(jump(i, ls, isJumpIfTrue = false, instruction).toInt, ls, inputs)
-      case 7 => checkEquality(i, ls, lt, instruction, inputs)
-      case 8 => checkEquality(i, ls, eq, instruction, inputs)
+      case 7 => iterateProgramRec(i + 4, checkEquality(i, ls, lt, instruction), inputs)
+      case 8 => iterateProgramRec(i + 4, checkEquality(i, ls, eq, instruction), inputs)
       case 9 =>
         relativeBase += readValues(1, i, ls, instruction).head
         iterateProgramRec(i + 2, ls, inputs)
@@ -77,12 +77,11 @@ class Amplifier(initialProgram: List[Long] = List[Long](), initialInputs: List[L
     if (comparison) values(1) else startIndex + 3
   }
 
-  private def checkEquality(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Boolean, instruction: Instruction,
-                            inputs: List[Long]): ProgramState = {
+  private def checkEquality(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Boolean,
+                            instruction: Instruction): Map[Int, Long] = {
     val values = readValues(2, startIndex, ls, instruction)
     val comparison = if (fn(values(0), values(1))) 1 else 0
-    val value = writeValue(startIndex, 3, comparison, ls, instruction)
-    iterateProgramRec(startIndex + 4, value, inputs)
+    writeValue(startIndex, 3, comparison, ls, instruction)
   }
 
   private def readValues(numValues: Int, startIndex: Int, ls: Map[Int, Long],
