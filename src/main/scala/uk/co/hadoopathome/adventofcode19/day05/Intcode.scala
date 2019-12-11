@@ -2,7 +2,7 @@ package uk.co.hadoopathome.adventofcode19.day05
 
 import scala.collection.mutable.ListBuffer
 
-class Amplifier(initialProgram: List[Long] = List[Long](), initialInputs: List[Long] = List[Long]()) {
+class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Long] = List[Long]()) {
 
   def this(initialProgram: List[Long], initialInput: Long) {
     this(initialProgram, List[Long](initialInput))

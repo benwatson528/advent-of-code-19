@@ -1,30 +1,31 @@
 package uk.co.hadoopathome.adventofcode19.day11
 
-import uk.co.hadoopathome.adventofcode19.day05.Amplifier
+import uk.co.hadoopathome.adventofcode19.day05.Intcode
 
 object SpacePolice {
 
   case class Coord(x: Int, y: Int)
 
   type Robot = (Coord, Char)
+
   private val LEFT_TURNS = "^<v>".toList
   private val RIGHT_TURNS = LEFT_TURNS.reverse
   private val CENTRE = Coord(0, 0)
 
   def findNumPaintedPanels(ls: List[Long]): Int = {
-    val amplifier = new Amplifier(ls)
+    val amplifier = new Intcode(ls)
     val robot = (CENTRE, '^')
     paintRec(robot, amplifier, Map[Coord, Int](CENTRE -> 0)).size
   }
 
   def drawRegistration(ls: List[Long]): Map[Coord, Int] = {
-    val amplifier = new Amplifier(ls)
+    val amplifier = new Intcode(ls)
     val robot = (CENTRE, '^')
     paintRec(robot, amplifier, Map[Coord, Int](CENTRE -> 1))
   }
 
   @scala.annotation.tailrec
-  private def paintRec(robot: Robot, amplifier: Amplifier, painted: Map[Coord, Int]): Map[Coord, Int] = {
+  private def paintRec(robot: Robot, amplifier: Intcode, painted: Map[Coord, Int]): Map[Coord, Int] = {
     val currentColour = painted.getOrElse(robot._1, 0)
     val (newColour, isFinished) = amplifier.runWithPause(currentColour)
     val updatedPainted = if (currentColour != newColour.toInt) painted + (robot._1 -> newColour.toInt) else painted
