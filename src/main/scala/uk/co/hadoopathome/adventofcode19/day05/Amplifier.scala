@@ -19,7 +19,13 @@ class Amplifier(initialProgram: List[Long] = List[Long](), initialInputs: List[L
   def runUntilCompletion(): Long = runUntilOutputRec(lastProgramState)
 
   def runWithPause(input: Long): (Long, Boolean) = {
-    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program, lastProgramState.inputs :+ input)
+    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program,
+      lastProgramState.inputs :+ input)
+    (outputs.last, lastProgramState.isFinished)
+  }
+
+  def runWithPause(): (Long, Boolean) = {
+    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program, lastProgramState.inputs)
     (outputs.last, lastProgramState.isFinished)
   }
 
