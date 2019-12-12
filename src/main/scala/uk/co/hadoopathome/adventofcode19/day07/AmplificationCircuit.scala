@@ -12,19 +12,19 @@ object AmplificationCircuit {
 
   private def runLinear(ls: List[Long], phaseSettings: List[Long]): Long = {
     val amplifiers = phaseSettings.map(new Intcode(ls, _))
-    amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runWithPause(outputAndStatus)._1)
+    amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runUntilPause(outputAndStatus)._1)
   }
 
   private def runFeedbackLoop(ls: List[Long], phaseSettings: List[Long]): Long = {
     val amplifiers = phaseSettings.map(new Intcode(ls, _))
-    val output = amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runWithPause(outputAndStatus)._1)
+    val output = amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runUntilPause(outputAndStatus)._1)
     runFeedbackLoopRec(amplifiers, output)
   }
 
   @scala.annotation.tailrec
   private def runFeedbackLoopRec(amplifiers: List[Intcode], firstInput: Long): Long = {
     val (output, isFinished) = amplifiers.foldLeft((firstInput, false))((outputAndStatus, amp) =>
-      amp.runWithPause(outputAndStatus._1))
+      amp.runUntilPause(outputAndStatus._1))
     if (isFinished) output else runFeedbackLoopRec(amplifiers, output)
   }
 }

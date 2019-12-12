@@ -15,12 +15,12 @@ class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Lon
 
   def runUntilHalt(): Long = runUntilHaltRec(pausedProgramState)
 
-  def runWithPause(input: Long): (Long, Boolean) = {
+  def runUntilPause(input: Long): (Long, Boolean) = {
     pausedProgramState = iterateProgramRec(pausedProgramState.copy(inputs = pausedProgramState.inputs :+ input))
     (pausedProgramState.outputs.last, pausedProgramState.isFinished)
   }
 
-  def runWithPause(): (Long, Boolean) = {
+  def runUntilPause(): (Long, Boolean) = {
     pausedProgramState = iterateProgramRec(pausedProgramState)
     (pausedProgramState.outputs.last, pausedProgramState.isFinished)
   }
