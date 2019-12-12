@@ -12,7 +12,7 @@ class SpacePoliceTest extends FunSuite {
   }
 
 //  test("drawRegistration real") {
-//    val input = parseInput(Source.fromResource("day11/input.txt").getLines.next())
+//    val input = parseInput(Source.fromResource("day11/real-input.txt").getLines.next())
 //    assert(SpacePolice.drawRegistration(input.toList) === 1681)
 //  }
 

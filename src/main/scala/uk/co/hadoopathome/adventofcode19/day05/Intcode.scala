@@ -99,10 +99,11 @@ class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Lon
 
   private def writeValue(startIndex: Int, subIndex: Int, value: Long, ls: Map[Int, Long],
                          instruction: Instruction): Map[Int, Long] = {
+    val rootIndex = startIndex + subIndex
     if (instruction.relativeModes.contains(subIndex - 1))
-      ls.updated(ls(startIndex + subIndex).toInt + relativeBase.toInt, value)
+      ls.updated(ls(rootIndex).toInt + relativeBase.toInt, value)
     else
-      ls.updated(ls(startIndex + subIndex).toInt, value)
+      ls.updated(ls(rootIndex).toInt, value)
   }
 
   private def convertInputToMap(ls: List[Long]): Map[Int, Long] =
