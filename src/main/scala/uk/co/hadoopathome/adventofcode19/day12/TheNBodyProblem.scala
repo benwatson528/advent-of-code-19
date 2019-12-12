@@ -73,7 +73,7 @@ object TheNBodyProblem {
 
   private def haveSameValue(moons: List[Moon], originalMoons: List[Moon], axis: Axis): Boolean =
     moons.zip(originalMoons).forall(
-      p => getPosition(p._1, axis) == getPosition(p._2, axis) && getVelocity(p._1, axis) == getVelocity(p._2, axis))
+      p => getPosition(p._1, axis) == getPosition(p._2, axis) && getVelocity(p._1, axis) == 0)
 
   private def getVelocity(moon: Moon, axis: Axis): Int = getCoord(moon.velocity, axis)
 
