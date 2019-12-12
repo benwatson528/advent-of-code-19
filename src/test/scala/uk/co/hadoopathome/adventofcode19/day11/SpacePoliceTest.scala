@@ -11,10 +11,10 @@ class SpacePoliceTest extends FunSuite {
     assert(SpacePolice.findNumPaintedPanels(input.toList) === 1681)
   }
 
-//  test("drawRegistration real") {
-//    val input = parseInput(Source.fromResource("day11/real-input.txt").getLines.next())
-//    assert(SpacePolice.drawRegistration(input.toList) === 1681)
-//  }
+  test("drawRegistration real") {
+    val input = parseInput(Source.fromResource("day11/input.txt").getLines.next())
+    assert(SpacePolice.drawRegistration(input.toList) === 1681)
+  }
 
   private def parseInput(input: String): IndexedSeq[Long] = input.split(",").map(_.toLong)
 

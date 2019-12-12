@@ -1,109 +1,123 @@
 package uk.co.hadoopathome.adventofcode19.day05
 
-import scala.collection.mutable.ListBuffer
-
 class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Long] = List[Long]()) {
 
   def this(initialProgram: List[Long], initialInput: Long) {
     this(initialProgram, List[Long](initialInput))
   }
 
-  case class ProgramState(pointer: Int, program: Map[Int, Long], inputs: List[Long], isFinished: Boolean)
+  case class ProgramState(pointer: Int, program: Map[Int, Long], inputs: List[Long], relativeBase: Long,
+                          outputs: List[Long], isFinished: Boolean = false)
 
-  private case class Instruction(opcode: Long, immediateModes: Set[Int], relativeModes: Set[Int])
+  private case class Instruction(opcode: Long, modes: List[Int])
 
-  private val outputs = new ListBuffer[Long]()
-  private var lastProgramState = ProgramState(0, convertInputToMap(initialProgram), initialInputs, isFinished = false)
-  private var relativeBase = 0L
+  private var pausedProgramState = ProgramState(0, convertInputToMap(initialProgram), initialInputs, 0, List[Long]())
 
-  def runUntilCompletion(): Long = runUntilOutputRec(lastProgramState)
+  def runUntilHalt(): Long = runUntilHaltRec(pausedProgramState)
 
   def runWithPause(input: Long): (Long, Boolean) = {
-    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program,
-      lastProgramState.inputs :+ input)
-    (outputs.last, lastProgramState.isFinished)
+    pausedProgramState = iterateProgramRec(pausedProgramState.copy(inputs = pausedProgramState.inputs :+ input))
+    (pausedProgramState.outputs.last, pausedProgramState.isFinished)
   }
 
   def runWithPause(): (Long, Boolean) = {
-    lastProgramState = iterateProgramRec(lastProgramState.pointer, lastProgramState.program, lastProgramState.inputs)
-    (outputs.last, lastProgramState.isFinished)
+    pausedProgramState = iterateProgramRec(pausedProgramState)
+    (pausedProgramState.outputs.last, pausedProgramState.isFinished)
   }
 
   @scala.annotation.tailrec
-  private def runUntilOutputRec(programState: ProgramState): Long = {
-    if (programState.isFinished) outputs.last
-    else runUntilOutputRec(iterateProgramRec(programState.pointer, programState.program, programState.inputs))
-  }
+  private def runUntilHaltRec(programState: ProgramState): Long =
+    if (programState.isFinished)
+      programState.outputs.last
+    else
+      runUntilHaltRec(iterateProgramRec(programState))
 
   @scala.annotation.tailrec
-  private def iterateProgramRec(i: Int, ls: Map[Int, Long], inputs: List[Long]): ProgramState = {
-    val instruction = parseInstruction(ls(i))
+  private def iterateProgramRec(programState: ProgramState): ProgramState = {
+    val (i, ls, inputs, relativeBase, outputs) = (programState.pointer, programState.program, programState.inputs,
+        programState.relativeBase, programState.outputs)
+    val instruction = parseInstruction(ls(i).toInt)
     instruction.opcode match {
-      case 1 => iterateProgramRec(i + 4, operate(i, ls, add, instruction), inputs)
-      case 2 => iterateProgramRec(i + 4, operate(i, ls, mult, instruction), inputs)
-      case 3 => iterateProgramRec(i + 2, writeValue(i, 1, inputs.head, ls, instruction), inputs.tail)
+      case 1 =>
+        val newProgram = operate(i, ls, add, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
+      case 2 =>
+        val newProgram = operate(i, ls, mult, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
+      case 3 =>
+        val newProgram = writeValue(i, 1, inputs.head, ls, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 2, program = newProgram, inputs = inputs.tail))
       case 4 =>
-        outputs += readValues(1, i, ls, instruction).head
-        ProgramState(i + 2, ls, inputs, isFinished = false)
-      case 5 => iterateProgramRec(jump(i, ls, isJumpIfTrue = true, instruction).toInt, ls, inputs)
-      case 6 => iterateProgramRec(jump(i, ls, isJumpIfTrue = false, instruction).toInt, ls, inputs)
-      case 7 => iterateProgramRec(i + 4, checkEquality(i, ls, lt, instruction), inputs)
-      case 8 => iterateProgramRec(i + 4, checkEquality(i, ls, eq, instruction), inputs)
+        val newOutputs = outputs :+ readValue(i, 1, ls, relativeBase, instruction)
+        programState.copy(pointer = i + 2, outputs = newOutputs)
+      case 5 =>
+        val newPointer = jump(i, ls, isJumpIfTrue = true, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = newPointer))
+      case 6 =>
+        val newPointer = jump(i, ls, isJumpIfTrue = false, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = newPointer))
+      case 7 =>
+        val newProgram = checkEquality(i, ls, lt, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
+      case 8 =>
+        val newProgram = checkEquality(i, ls, eq, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
       case 9 =>
-        relativeBase += readValues(1, i, ls, instruction).head
-        iterateProgramRec(i + 2, ls, inputs)
-      case 99 => ProgramState(i, ls, inputs, isFinished = true)
+        val newRelativeBase = relativeBase + readValue(i, 1, ls, relativeBase, instruction)
+        iterateProgramRec(programState.copy(pointer = i + 2, relativeBase = newRelativeBase))
+      case 99 =>
+        programState.copy(isFinished = true)
     }
   }
 
-  private def parseInstruction(i: Long): Instruction = {
-    val rawInstruction = i.toString
-    val immediateModes = for (i <- rawInstruction.length - 2 to 0 by -1; if (rawInstruction(i) == '1'))
-      yield rawInstruction.length - 3 - i
-    val relativeModes = for (i <- rawInstruction.length - 2 to 0 by -1; if (rawInstruction(i) == '2'))
-      yield rawInstruction.length - 3 - i
-    Instruction(i % 100, immediateModes.toSet, relativeModes.toSet)
-  }
-
-  private def operate(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Long,
+  private def operate(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Long, relativeBase: Long,
                       instruction: Instruction): Map[Int, Long] = {
-    val values = readValues(2, startIndex, ls, instruction)
-    writeValue(startIndex, 3, fn(values(0), values(1)), ls, instruction)
+    val value1 = readValue(startIndex, 1, ls, relativeBase, instruction)
+    val value2 = readValue(startIndex, 2, ls, relativeBase, instruction)
+    writeValue(startIndex, 3, fn(value1, value2), ls, relativeBase, instruction)
   }
 
-  private def jump(startIndex: Int, ls: Map[Int, Long], isJumpIfTrue: Boolean, instruction: Instruction): Long = {
-    val values = readValues(2, startIndex, ls, instruction)
-    val comparison = if (isJumpIfTrue) values(0) != 0 else values(0) == 0
-    if (comparison) values(1) else startIndex + 3
+  private def jump(startIndex: Int, ls: Map[Int, Long], isJumpIfTrue: Boolean, relativeBase: Long,
+                   instruction: Instruction): Int = {
+    val value1 = readValue(startIndex, 1, ls, relativeBase, instruction)
+    val value2 = readValue(startIndex, 2, ls, relativeBase, instruction)
+    val comparison = if (isJumpIfTrue) value1 != 0 else value1 == 0
+    if (comparison) value2.toInt else startIndex + 3
   }
 
-  private def checkEquality(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Boolean,
+  private def checkEquality(startIndex: Int, ls: Map[Int, Long], fn: (Long, Long) => Boolean, relativeBase: Long,
                             instruction: Instruction): Map[Int, Long] = {
-    val values = readValues(2, startIndex, ls, instruction)
-    val comparison = if (fn(values(0), values(1))) 1 else 0
-    writeValue(startIndex, 3, comparison, ls, instruction)
+    val value1 = readValue(startIndex, 1, ls, relativeBase, instruction)
+    val value2 = readValue(startIndex, 2, ls, relativeBase, instruction)
+    val comparison = if (fn(value1, value2)) 1 else 0
+    writeValue(startIndex, 3, comparison, ls, relativeBase, instruction)
   }
 
-  private def readValues(numValues: Int, startIndex: Int, ls: Map[Int, Long],
-                         instruction: Instruction): IndexedSeq[Long] = {
-    for (i <- 0 until numValues) yield {
-      val rootIndex = startIndex + i + 1
-      if (instruction.immediateModes.contains(i))
-        ls(rootIndex)
-      else if (instruction.relativeModes.contains(i))
-        ls(ls(rootIndex.toInt).toInt + relativeBase.toInt).toInt
-      else
-        ls(ls(rootIndex).toInt)
+  private def readValue(startIndex: Int, subIndex: Int, ls: Map[Int, Long], relativeBase: Long,
+                        instruction: Instruction): Long = {
+    val rootIndex = startIndex + subIndex
+    instruction.modes(subIndex - 1) match {
+      case 0 => ls(ls(rootIndex).toInt)
+      case 1 => ls(rootIndex)
+      case 2 => ls(ls(rootIndex.toInt).toInt + relativeBase.toInt)
     }
   }
 
-  private def writeValue(startIndex: Int, subIndex: Int, value: Long, ls: Map[Int, Long],
+  private def writeValue(startIndex: Int, subIndex: Int, value: Long, ls: Map[Int, Long], relativeBase: Long,
                          instruction: Instruction): Map[Int, Long] = {
     val rootIndex = startIndex + subIndex
-    if (instruction.relativeModes.contains(subIndex - 1))
-      ls.updated(ls(rootIndex).toInt + relativeBase.toInt, value)
-    else
-      ls.updated(ls(rootIndex).toInt, value)
+    instruction.modes(subIndex - 1) match {
+      case 0 => ls.updated(ls(rootIndex).toInt, value)
+      case 1 => throw new IllegalArgumentException("Can't write with immediate mode")
+      case 2 => ls.updated(ls(rootIndex).toInt + relativeBase.toInt, value)
+    }
+  }
+
+  private def parseInstruction(i: Int): Instruction = {
+    val mode1 = i / 100 % 10
+    val mode2 = i / 1000 % 10
+    val mode3 = i / 10000 % 10
+    Instruction(i % 100, List(mode1, mode2, mode3))
   }
 
   private def convertInputToMap(ls: List[Long]): Map[Int, Long] =
