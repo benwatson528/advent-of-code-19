@@ -6,12 +6,12 @@ package object day12 {
 
   case class Moon(position: Coord, velocity: Coord)
 
-  sealed abstract class Axis(val name: String)
+  sealed abstract class Axis
 
-  case object X extends Axis("x")
+  case object X extends Axis
 
-  case object Y extends Axis("x")
+  case object Y extends Axis
 
-  case object Z extends Axis("x")
+  case object Z extends Axis
 
 }
