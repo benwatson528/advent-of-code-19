@@ -2,7 +2,6 @@ package uk.co.hadoopathome.adventofcode19
 
 package object day13 {
 
-
   sealed abstract class Command()
 
   case class Score(x: Int, y: Int, score: Long) extends Command

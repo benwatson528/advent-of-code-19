@@ -4,15 +4,11 @@ import uk.co.hadoopathome.adventofcode19.day05.Intcode
 
 object CarePackage {
 
-  def populateBoard(ls: List[Long]): Vector[Tile] = {
-    val intcode = new Intcode(ls)
-    readCommandsRec(intcode, Vector[Tile]())._1
-  }
+  def populateBoard(ls: List[Long]): Vector[Tile] = readCommandsRec(new Intcode(ls), Vector[Tile]())._1
 
   def playGame(ls: List[Long]): Long = {
     val gameProgram = ls.updated(0, 2L)
-    val intcode = new Intcode(gameProgram)
-    readCommandsRec(intcode, Vector[Tile]())._2.get
+    readCommandsRec(new Intcode(gameProgram), Vector[Tile]())._2.get
   }
 
   @scala.annotation.tailrec
@@ -20,9 +16,7 @@ object CarePackage {
     val newCommand = readCommand(intcode)
     newCommand match {
       case Some(Score(_, _, score)) =>
-        if (!board.exists(_.id == BLOCK)) return (board, Some(score))
-        intcode.provideInput(moveJoystick(board))
-        readCommandsRec(intcode, board)
+        if (!board.exists(_.id == BLOCK)) (board, Some(score)) else readCommandsRec(intcode, board)
       case Some(Tile(x, y, id)) =>
         val updatedBoard = updateBoard(Tile(x, y, id), board)
         if (id == BALL || id == PADDLE) intcode.provideInput(moveJoystick(updatedBoard))
