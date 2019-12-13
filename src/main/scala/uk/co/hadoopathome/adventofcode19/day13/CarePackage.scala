@@ -9,6 +9,13 @@ object CarePackage {
     readTilesRec(intcode, List[Tile]())
   }
 
+  def playGame(ls: List[Long]): List[Tile] = {
+    val gameProgram = ls.updated(0, 2L)
+    val intcode = new Intcode(gameProgram)
+    readTilesRec(intcode, List[Tile]())
+  }
+
+  @scala.annotation.tailrec
   private def readTilesRec(intcode: Intcode, tiles: List[Tile]): List[Tile] = {
     val newTile = readTile(intcode)
     newTile match {
