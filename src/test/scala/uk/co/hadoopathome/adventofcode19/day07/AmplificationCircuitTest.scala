@@ -4,8 +4,7 @@ import org.scalatest.FunSuite
 
 import scala.io.Source
 
-//Doesn't work after day 13 - need a way to provide multiple inputs
-class AmplificationCircuitTest(ignore: String) extends FunSuite {
+class AmplificationCircuitTest extends FunSuite {
   test("maxSignalSingleLoop 4,3,2,1,0") {
     val input = parseInput("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0")
     assert(AmplificationCircuit.maxSignalSingleRun(input) === 43210)

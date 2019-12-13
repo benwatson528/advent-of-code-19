@@ -1,13 +1,14 @@
 package uk.co.hadoopathome.adventofcode19.day05
 
-class Intcode(initialProgram: List[Long] = List[Long](), var input: Option[Long] = None) {
+class Intcode(initialProgram: List[Long] = List[Long](), var initialInput: Option[Long] = None) {
 
   case class ProgramState(pointer: Int, program: Map[Int, Long], relativeBase: Long, outputs: List[Long],
                           isFinished: Boolean = false)
 
   private case class Instruction(opcode: Long, modes: List[Int])
 
-  private var pausedProgramState = ProgramState(0, convertInputToMap(initialProgram), 0, List[Long]())
+  private var input: Option[Long] = None
+  private var pausedProgramState: ProgramState = ProgramState(0, convertInputToMap(initialProgram), 0, List[Long]())
 
   def runUntilHalt(): Long = runUntilHaltRec(pausedProgramState)
 
@@ -39,8 +40,7 @@ class Intcode(initialProgram: List[Long] = List[Long](), var input: Option[Long]
         val newProgram = operate(i, ls, mult, relativeBase, instruction)
         iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
       case 3 =>
-        val newProgram = writeValue(i, 1, input.get, ls, relativeBase, instruction)
-        this.input = None
+        val newProgram = writeValue(i, 1, takeInput(), ls, relativeBase, instruction)
         iterateProgramRec(programState.copy(pointer = i + 2, program = newProgram))
       case 4 =>
         val newOutputs = outputs :+ readValue(i, 1, ls, relativeBase, instruction)
@@ -113,6 +113,18 @@ class Intcode(initialProgram: List[Long] = List[Long](), var input: Option[Long]
     val mode2 = i / 1000 % 10
     val mode3 = i / 10000 % 10
     Instruction(i % 100, List(mode1, mode2, mode3))
+  }
+
+  private def takeInput(): Int = {
+    var inputToUse = 0
+    if (this.initialInput.isDefined) {
+      inputToUse = this.initialInput.get.toInt
+      this.initialInput = None
+    } else {
+      inputToUse = this.input.get.toInt
+      this.input = None
+    }
+    inputToUse
   }
 
   private def convertInputToMap(ls: List[Long]): Map[Int, Long] =
