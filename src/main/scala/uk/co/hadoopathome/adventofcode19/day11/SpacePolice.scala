@@ -27,10 +27,10 @@ object SpacePolice {
   @scala.annotation.tailrec
   private def paintRec(robot: Robot, intcode: Intcode, painted: Map[Coord, Int]): Map[Coord, Int] = {
     val currentColour = painted.getOrElse(robot._1, 0)
-    val (newColour, isFinished) = intcode.runUntilPause(currentColour)
+    val (newColour, isFinished) = intcode.runUntilPause(Some(currentColour))
     val updatedPainted = if (currentColour != newColour.toInt) painted + (robot._1 -> newColour.toInt) else painted
     if (isFinished) return updatedPainted
-    val turnDirection = intcode.runUntilPause()._1.toInt
+    val turnDirection = intcode.runUntilPause(None)._1.toInt
     val newRobot = moveRobot(turnRobot(robot, turnDirection))
     paintRec(newRobot, intcode, updatedPainted)
   }

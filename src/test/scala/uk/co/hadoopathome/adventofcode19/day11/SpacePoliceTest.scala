@@ -14,7 +14,7 @@ class SpacePoliceTest extends FunSuite {
 
   test("drawRegistration real") {
     val input = parseInput(Source.fromResource("day11/input.txt").getLines.next())
-   // drawOutput(SpacePolice.drawRegistration(input.toList))
+    SpacePolice.drawRegistration(input.toList) //Call drawOutput() to see it
   }
 
   private def parseInput(input: String): IndexedSeq[Long] = input.split(",").map(_.toLong)

@@ -6,30 +6,34 @@ object CarePackage {
 
   def populateTiles(ls: List[Long]): List[Tile] = {
     val intcode = new Intcode(ls)
-    readTilesRec(intcode, List[Tile]())
+    readCommandsRec(intcode, List[Command](), None).filter(_.isInstanceOf[Tile]).asInstanceOf[List[Tile]]
   }
 
-  def playGame(ls: List[Long]): List[Tile] = {
+  def playGame(ls: List[Long]): List[Command] = {
     val gameProgram = ls.updated(0, 2L)
     val intcode = new Intcode(gameProgram)
-    readTilesRec(intcode, List[Tile]())
+    readCommandsRec(intcode, List[Command](), None)
   }
 
   @scala.annotation.tailrec
-  private def readTilesRec(intcode: Intcode, tiles: List[Tile]): List[Tile] = {
-    val newTile = readTile(intcode)
-    newTile match {
-      case Some(t) => readTilesRec(intcode, tiles :+ t)
+  private def readCommandsRec(intcode: Intcode, tiles: List[Command],
+                              joystickMovement: Option[Long]): List[Command] = {
+    val newCommand = readCommand(intcode, joystickMovement)
+    newCommand match {
+      case Some(Score(_, _, score)) =>
+        //Do something here based on the score?
+        readCommandsRec(intcode, tiles, Some(-1))
+      case Some(Tile(x, y, id)) => readCommandsRec(intcode, tiles :+ Tile(x, y, id), None)
       case None => tiles
     }
   }
 
-  private def readTile(intcode: Intcode): Option[Tile] = {
-    val (x, isFinished) = intcode.runUntilPause()
+  private def readCommand(intcode: Intcode, joystickMovement: Option[Long]): Option[Command] = {
+    val (x, isFinished) = intcode.runUntilPause(joystickMovement)
     if (isFinished) return None
-    val (y, _) = intcode.runUntilPause()
-    val (id, _) = intcode.runUntilPause()
-    Some(Tile(x.toInt, y.toInt, mapToId(id)))
+    val (y, _) = intcode.runUntilPause(None)
+    val (param, _) = intcode.runUntilPause(None)
+    if (x == -1 && y == 0) Some(Score(x.toInt, y.toInt, param)) else Some(Tile(x.toInt, y.toInt, mapToId(param)))
   }
 
   private def mapToId(id: Long): Id = id match {
