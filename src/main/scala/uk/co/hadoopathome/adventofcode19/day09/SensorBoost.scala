@@ -9,7 +9,7 @@ object SensorBoost {
   }
 
   def runIntCode(ls: IndexedSeq[Long], input: Int): Long = {
-    val intcode = new Intcode(ls.toList, input)
+    val intcode = new Intcode(ls.toList, Some(input))
     intcode.runUntilHalt()
   }
 }

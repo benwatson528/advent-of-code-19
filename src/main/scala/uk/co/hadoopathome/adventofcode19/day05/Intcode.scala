@@ -1,27 +1,23 @@
 package uk.co.hadoopathome.adventofcode19.day05
 
-class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Long] = List[Long]()) {
+class Intcode(initialProgram: List[Long] = List[Long](), var input: Option[Long] = None) {
 
-  def this(initialProgram: List[Long], initialInput: Long) {
-    this(initialProgram, List[Long](initialInput))
-  }
-
-  case class ProgramState(pointer: Int, program: Map[Int, Long], inputs: List[Long], relativeBase: Long,
-                          outputs: List[Long], isFinished: Boolean = false)
+  case class ProgramState(pointer: Int, program: Map[Int, Long], relativeBase: Long, outputs: List[Long],
+                          isFinished: Boolean = false)
 
   private case class Instruction(opcode: Long, modes: List[Int])
 
-  private var pausedProgramState = ProgramState(0, convertInputToMap(initialProgram), initialInputs, 0, List[Long]())
+  private var pausedProgramState = ProgramState(0, convertInputToMap(initialProgram), 0, List[Long]())
 
   def runUntilHalt(): Long = runUntilHaltRec(pausedProgramState)
 
   def runUntilPause(input: Option[Long]): (Long, Boolean) = {
-    pausedProgramState = input match {
-      case Some(i) => iterateProgramRec(pausedProgramState.copy(inputs = pausedProgramState.inputs :+ i))
-      case None => iterateProgramRec(pausedProgramState.copy(inputs = pausedProgramState.inputs))
-    }
+    if (input.isDefined) this.input = input
+    pausedProgramState = iterateProgramRec(pausedProgramState)
     (pausedProgramState.outputs.last, pausedProgramState.isFinished)
   }
+
+  def provideInput(input: Long): Unit = this.input = Some(input)
 
   @scala.annotation.tailrec
   private def runUntilHaltRec(programState: ProgramState): Long =
@@ -32,7 +28,7 @@ class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Lon
 
   @scala.annotation.tailrec
   private def iterateProgramRec(programState: ProgramState): ProgramState = {
-    val (i, ls, inputs, relativeBase, outputs) = (programState.pointer, programState.program, programState.inputs,
+    val (i, ls, relativeBase, outputs) = (programState.pointer, programState.program,
         programState.relativeBase, programState.outputs)
     val instruction = parseInstruction(ls(i).toInt)
     instruction.opcode match {
@@ -43,8 +39,9 @@ class Intcode(initialProgram: List[Long] = List[Long](), initialInputs: List[Lon
         val newProgram = operate(i, ls, mult, relativeBase, instruction)
         iterateProgramRec(programState.copy(pointer = i + 4, program = newProgram))
       case 3 =>
-        val newProgram = writeValue(i, 1, inputs.head, ls, relativeBase, instruction)
-        iterateProgramRec(programState.copy(pointer = i + 2, program = newProgram, inputs = inputs.tail))
+        val newProgram = writeValue(i, 1, input.get, ls, relativeBase, instruction)
+        this.input = None
+        iterateProgramRec(programState.copy(pointer = i + 2, program = newProgram))
       case 4 =>
         val newOutputs = outputs :+ readValue(i, 1, ls, relativeBase, instruction)
         programState.copy(pointer = i + 2, outputs = newOutputs)

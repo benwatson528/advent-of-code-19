@@ -11,12 +11,12 @@ object AmplificationCircuit {
     List(5L, 6L, 7L, 8L, 9L).permutations.map(runFeedbackLoop(ls.toList, _)).max
 
   private def runLinear(ls: List[Long], phaseSettings: List[Long]): Long = {
-    val amplifiers = phaseSettings.map(new Intcode(ls, _))
+    val amplifiers = phaseSettings.map(ps => new Intcode(ls, Some(ps)))
     amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runUntilPause(Some(outputAndStatus))._1)
   }
 
   private def runFeedbackLoop(ls: List[Long], phaseSettings: List[Long]): Long = {
-    val amplifiers = phaseSettings.map(new Intcode(ls, _))
+    val amplifiers = phaseSettings.map(ps => new Intcode(ls, Some(ps)))
     val output = amplifiers.foldLeft(0L)((outputAndStatus, amp) => amp.runUntilPause(Some(outputAndStatus))._1)
     runFeedbackLoopRec(amplifiers, output)
   }

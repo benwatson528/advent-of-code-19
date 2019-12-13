@@ -4,32 +4,53 @@ import uk.co.hadoopathome.adventofcode19.day05.Intcode
 
 object CarePackage {
 
-  def populateTiles(ls: List[Long]): List[Tile] = {
+  def populateBoard(ls: List[Long]): Vector[Tile] = {
     val intcode = new Intcode(ls)
-    readCommandsRec(intcode, List[Command](), None).filter(_.isInstanceOf[Tile]).asInstanceOf[List[Tile]]
+    readCommandsRec(intcode, Vector[Tile]())._1
   }
 
-  def playGame(ls: List[Long]): List[Command] = {
+  def playGame(ls: List[Long]): Long = {
     val gameProgram = ls.updated(0, 2L)
     val intcode = new Intcode(gameProgram)
-    readCommandsRec(intcode, List[Command](), None)
+    readCommandsRec(intcode, Vector[Tile]())._2.get
   }
 
   @scala.annotation.tailrec
-  private def readCommandsRec(intcode: Intcode, tiles: List[Command],
-                              joystickMovement: Option[Long]): List[Command] = {
-    val newCommand = readCommand(intcode, joystickMovement)
+  private def readCommandsRec(intcode: Intcode, board: Board): (Board, Option[Long]) = {
+    val newCommand = readCommand(intcode)
     newCommand match {
       case Some(Score(_, _, score)) =>
-        //Do something here based on the score?
-        readCommandsRec(intcode, tiles, Some(-1))
-      case Some(Tile(x, y, id)) => readCommandsRec(intcode, tiles :+ Tile(x, y, id), None)
-      case None => tiles
+        if (!board.exists(_.id == BLOCK)) return (board, Some(score))
+        intcode.provideInput(moveJoystick(board))
+        readCommandsRec(intcode, board)
+      case Some(Tile(x, y, id)) =>
+        val updatedBoard = updateBoard(Tile(x, y, id), board)
+        if (id == BALL || id == PADDLE) intcode.provideInput(moveJoystick(updatedBoard))
+        readCommandsRec(intcode, updatedBoard)
+      case None => (board, None)
     }
   }
 
-  private def readCommand(intcode: Intcode, joystickMovement: Option[Long]): Option[Command] = {
-    val (x, isFinished) = intcode.runUntilPause(joystickMovement)
+  private def moveJoystick(board: Board): Long = {
+    val ball = board.find(_.id == BALL)
+    val paddle = board.find(_.id == PADDLE)
+    if (ball.isEmpty || paddle.isEmpty) 0
+    else {
+      val ballX = ball.get.x
+      val paddleX = paddle.get.x
+      if (ballX < paddleX) -1
+      else if (ballX == paddleX) 0
+      else 1
+    }
+  }
+
+  private def updateBoard(newTile: Tile, board: Board): Board = {
+    val index = board.indexWhere(t => newTile.x == t.x && newTile.y == t.y)
+    if (index == -1) board :+ newTile else board.updated(index, newTile)
+  }
+
+  private def readCommand(intcode: Intcode): Option[Command] = {
+    val (x, isFinished) = intcode.runUntilPause(None)
     if (isFinished) return None
     val (y, _) = intcode.runUntilPause(None)
     val (param, _) = intcode.runUntilPause(None)
@@ -40,7 +61,7 @@ object CarePackage {
     case 0 => EMPTY
     case 1 => WALL
     case 2 => BLOCK
-    case 3 => HORIZONTAL
+    case 3 => PADDLE
     case 4 => BALL
   }
 }
