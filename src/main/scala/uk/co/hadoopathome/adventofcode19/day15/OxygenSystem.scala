@@ -31,10 +31,12 @@ object OxygenSystem {
   }
 
   @scala.annotation.tailrec
-  private def findShortestPathRec(queue: mutable.PriorityQueue[CoordSteps], visited: List[Coord], oxygen: Coord, grid: Grid): Int = {
+  private def findShortestPathRec(queue: mutable.PriorityQueue[CoordSteps], visited: List[Coord], oxygen: Coord,
+                                  grid: Grid): Int = {
     val elem = queue.dequeue()
     if (elem.coords != oxygen) {
-      findShortestPathRec(enqueueAdjacentCoords(queue, elem, visited, oxygen, grid), findAdjacentCoords(elem.coords) ::: visited, oxygen, grid)
+      findShortestPathRec(enqueueAdjacentCoords(queue, elem, visited, oxygen, grid),
+        findAdjacentCoords(elem.coords) ::: visited, oxygen, grid)
     } else {
       elem.steps
     }
@@ -48,8 +50,9 @@ object OxygenSystem {
     ls
   }
 
-  private def enqueueAdjacentCoords(q: mutable.PriorityQueue[CoordSteps], c: CoordSteps, visited: List[Coord], oxygen: Coord, grid: Grid): mutable.PriorityQueue[CoordSteps] = {
-    for(adj <- findAdjacentCoords(c.coords)) {
+  private def enqueueAdjacentCoords(q: mutable.PriorityQueue[CoordSteps], c: CoordSteps, visited: List[Coord],
+                                    oxygen: Coord, grid: Grid): mutable.PriorityQueue[CoordSteps] = {
+    for (adj <- findAdjacentCoords(c.coords)) {
       if (!visited.contains(adj) && grid(adj) != WALL) {
         q.enqueue(CoordSteps(adj, c.steps + 1, heuristic(adj, oxygen)))
       }
@@ -73,8 +76,10 @@ object OxygenSystem {
       val cellMovedTo = moveInDirection(currentPosition, newDirection.get)
       movedOutcome match {
         case 0 => exploreBoardRec(intcode, currentPath, currentPosition, history + (cellMovedTo -> WALL))
-        case 1 => exploreBoardRec(intcode, currentPosition +: currentPath, cellMovedTo, history + (cellMovedTo -> EMPTY))
-        case 2 => exploreBoardRec(intcode, currentPosition +: currentPath, cellMovedTo, history + (cellMovedTo -> OXYGEN))
+        case 1 =>
+          exploreBoardRec(intcode, currentPosition +: currentPath, cellMovedTo, history + (cellMovedTo -> EMPTY))
+        case 2 =>
+          exploreBoardRec(intcode, currentPosition +: currentPath, cellMovedTo, history + (cellMovedTo -> OXYGEN))
       }
     }
   }
