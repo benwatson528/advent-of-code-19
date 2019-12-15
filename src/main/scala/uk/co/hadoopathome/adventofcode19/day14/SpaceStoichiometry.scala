@@ -11,6 +11,7 @@ object SpaceStoichiometry {
   }
 
   //Gotta go recursive the other way
+  //Have a recursive "buy" method - Map(Chemical, remaining: Int)
 
   @scala.annotation.tailrec
   private def replaceRec(equations: Vector[Equation], rootElements: Set[String]): Equation = {
