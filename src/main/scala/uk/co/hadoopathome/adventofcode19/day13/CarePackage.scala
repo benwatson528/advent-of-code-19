@@ -1,46 +1,49 @@
 package uk.co.hadoopathome.adventofcode19.day13
 
 import uk.co.hadoopathome.adventofcode19.day05.Intcode
+import uk.co.hadoopathome.adventofcode19.day11.SpacePolice.Coord
 
 object CarePackage {
 
-  def populateBoard(ls: List[Long]): Vector[Tile] = readCommandsRec(new Intcode(ls), Vector[Tile]())._1
+  def populateBoard(ls: List[Long]): Long = readCommandsRec(new Intcode(ls), None, None, Set[Coord]())
 
-  def playGame(ls: List[Long]): Long = {
-    val gameProgram = ls.updated(0, 2L)
-    readCommandsRec(new Intcode(gameProgram), Vector[Tile]())._2.get
-  }
+  def playGame(ls: List[Long]): Long = readCommandsRec(new Intcode(ls.updated(0, 2L)), None, None, Set[Coord]())
 
   @scala.annotation.tailrec
-  private def readCommandsRec(intcode: Intcode, board: Board): (Board, Option[Long]) = {
+  private def readCommandsRec(intcode: Intcode, paddle: Option[Coord], ball: Option[Coord],
+                              blocks: Set[Coord]): Long = {
     val newCommand = readCommand(intcode)
     newCommand match {
       case Some(Score(_, _, score)) =>
-        if (!board.exists(_.id == BLOCK)) (board, Some(score)) else readCommandsRec(intcode, board)
-      case Some(Tile(x, y, id)) =>
-        val updatedBoard = updateBoard(Tile(x, y, id), board)
-        if (id == BALL || id == PADDLE) intcode.provideInput(moveJoystick(updatedBoard))
-        readCommandsRec(intcode, updatedBoard)
-      case None => (board, None)
+        if (blocks.isEmpty) score else readCommandsRec(intcode, paddle, ball, blocks)
+      case Some(Tile(x, y, id)) => id match {
+        case PADDLE =>
+          intcode.provideInput(moveJoystick(Some(Coord(x, y)), ball))
+          readCommandsRec(intcode, Some(Coord(x, y)), ball, blocks)
+        case BALL =>
+          intcode.provideInput(moveJoystick(paddle, Some(Coord(x, y))))
+          readCommandsRec(intcode, paddle, Some(Coord(x, y)), blocks)
+        case BLOCK =>
+          readCommandsRec(intcode, paddle, ball, blocks + Coord(x, y))
+        case WALL =>
+          readCommandsRec(intcode, paddle, ball, blocks)
+        case EMPTY =>
+          if (blocks.contains(Coord(x, y))) readCommandsRec(intcode, paddle, ball, blocks - Coord(x, y))
+          else readCommandsRec(intcode, paddle, ball, blocks)
+      }
+      case None => blocks.size
     }
   }
 
-  private def moveJoystick(board: Board): Long = {
-    val ball = board.find(_.id == BALL)
-    val paddle = board.find(_.id == PADDLE)
-    if (ball.isEmpty || paddle.isEmpty) 0
+  private def moveJoystick(paddle: Option[Coord], ball: Option[Coord]): Long = {
+    if (paddle.isEmpty || ball.isEmpty) 0
     else {
-      val ballX = ball.get.x
       val paddleX = paddle.get.x
+      val ballX = ball.get.x
       if (ballX < paddleX) -1
       else if (ballX == paddleX) 0
       else 1
     }
-  }
-
-  private def updateBoard(newTile: Tile, board: Board): Board = {
-    val index = board.indexWhere(t => newTile.x == t.x && newTile.y == t.y)
-    if (index == -1) board :+ newTile else board.updated(index, newTile)
   }
 
   private def readCommand(intcode: Intcode): Option[Command] = {
