@@ -4,7 +4,7 @@ import org.scalatest.FunSuite
 
 import scala.io.Source
 
-class SpaceStoichiometryTest extends FunSuite {
+class SpaceStoichiometryTest(ignore: String) extends FunSuite {
   test("findRequiredOre small input") {
     val input = parseInput("day14/small-input.txt")
     assert(SpaceStoichiometry.findRequiredOre(input) === 31)
@@ -40,8 +40,8 @@ class SpaceStoichiometryTest extends FunSuite {
 
   private def parseRow(s: String): Equation = {
     val (rawLhs, rawRhs) = (s.split(" => ")(0), s.split(" => ")(1))
-    val rhs = (rawRhs.split(" ")(1), rawRhs.split(" ")(0).toLong)
-    val lhs = rawLhs.split(", ").map(x => x.split(" ")(1) -> x.split(" ")(0).toLong).toMap
+    val rhs = (rawRhs.split(" ")(1), rawRhs.split(" ")(0).toDouble)
+    val lhs = rawLhs.split(", ").map(x => x.split(" ")(1) -> x.split(" ")(0).toDouble).toMap
     Equation(lhs, rhs)
   }
 }
