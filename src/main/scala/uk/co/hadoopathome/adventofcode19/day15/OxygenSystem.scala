@@ -12,11 +12,19 @@ object OxygenSystem {
     val intcode = new Intcode(ls)
     val grid = exploreBoardRec(intcode, Vector[Coord](), START_POSITION, Map[Coord, Block]())
     val oxygen = grid.find(_._2 == OXYGEN).get._1
-    findShortestPath(oxygen, grid)
+    findShortestPath(oxygen, grid, START_POSITION)
   }
 
-  def findShortestPath(oxygen: Coord, grid: Grid): Int = {
-    val initialCoordSteps = CoordSteps(START_POSITION, 0, heuristic(START_POSITION, oxygen))
+  def furthestPointForOxygen(ls: List[Long]): Int = {
+    val intcode = new Intcode(ls)
+    val grid = exploreBoardRec(intcode, Vector[Coord](), START_POSITION, Map[Coord, Block]())
+    val oxygen = grid.find(_._2 == OXYGEN).get._1
+    val startPoints = grid.filter(_._2 == EMPTY)
+    startPoints.map(p => findShortestPath(oxygen, grid, p._1)).max
+  }
+
+  private def findShortestPath(oxygen: Coord, grid: Grid, startPosition: Coord): Int = {
+    val initialCoordSteps = CoordSteps(startPosition, 0, heuristic(startPosition, oxygen))
     val priorityQueue = new mutable.PriorityQueue[CoordSteps]()(Ordering.by(-_.manhattanDistance))
     priorityQueue.enqueue(initialCoordSteps)
     findShortestPathRec(priorityQueue, List[Coord](), oxygen, grid)

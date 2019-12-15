@@ -12,7 +12,7 @@ class CarePackageTest extends FunSuite {
     assert(board.count(_.id == BLOCK) === 296)
   }
 
-  test("playGame real") {
+  ignore("playGame real - ignored because slow") {
     val input = parseInput(Source.fromResource("day13/input.txt").getLines().next())
     assert(CarePackage.playGame(input) === 13824)
   }

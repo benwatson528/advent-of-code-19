@@ -11,4 +11,9 @@ class OxygenSystemTest extends FunSuite {
     val input = Source.fromResource("day15/input.txt").getLines.next().split(",").map(_.toLong).toList
     assert(OxygenSystem.moveToOxygen(input) === 308)
   }
+
+  test("furthestPointForOxygen real") {
+    val input = Source.fromResource("day15/input.txt").getLines.next().split(",").map(_.toLong).toList
+    assert(OxygenSystem.furthestPointForOxygen(input) === 328)
+  }
 }
