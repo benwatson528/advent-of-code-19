@@ -45,8 +45,7 @@ class DonutMazeTest extends FunSuite {
           val secondLabel = adjacentCells.find(_._2.isLetter).get
           val portalId = if (cell._1.x < secondLabel._1.x || cell._1.y < secondLabel._1.y) 
             cell._2.toString + secondLabel._2.toString
-          else
-            secondLabel._2.toString + cell._2.toString
+          else secondLabel._2.toString + cell._2.toString
           (cell._1, PORTAL(portalId))
         case None => (cell._1, EMPTY)
       }
